@@ -13,7 +13,7 @@ namespace Armony.Misc.UserInterface
             if (s == null)
                 Debug.LogError("No ScrollRect found above " + gameObject.name);
             else
-                GetComponent<ButtonExtended>().SelectedEvent += (object sender, bool selected) =>
+                GetComponent<ButtonExtended>().SelectedEvent += selected =>
                 {
                     if(selected)
                     {
