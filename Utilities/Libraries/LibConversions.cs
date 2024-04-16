@@ -6,7 +6,6 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibConversions
     {
-        #region Conversions
         public static Vector3 ToVector3(this float f)
         {
             return new Vector3(f, f, f);
@@ -14,10 +13,10 @@ namespace Armony.Utilities.Libraries
 
         public static Vector2[] ToVector2Array(this Vector3[] v3)
         {
-            return System.Array.ConvertAll<Vector3, Vector2>(v3, getV3fromV2);
+            return System.Array.ConvertAll<Vector3, Vector2>(v3, GetV3FromV2);
         }
 
-        public static Vector2 getV3fromV2(Vector3 v3)
+        public static Vector2 GetV3FromV2(Vector3 v3)
         {
             return new Vector2(v3.x, v3.y);
         }
@@ -64,21 +63,21 @@ namespace Armony.Utilities.Libraries
         {
             string ret = "";
 
-            int TimeUnitsToDisplay = 0;
+            int timeUnitsToDisplay = 0;
             if (t.TotalDays > 0)
             {
-                TimeUnitsToDisplay = 3;
+                timeUnitsToDisplay = 3;
             }
             else if (t.TotalHours > 0)
             {
-                TimeUnitsToDisplay = 2;
+                timeUnitsToDisplay = 2;
             }
             else if (t.TotalMinutes > 0)
             {
-                TimeUnitsToDisplay = 1;
+                timeUnitsToDisplay = 1;
             }
 
-            switch (TimeUnitsToDisplay)
+            switch (timeUnitsToDisplay)
             {
                 case 3:
                     ret += t.Days + " days, ";
@@ -98,6 +97,5 @@ namespace Armony.Utilities.Libraries
 
             return ret;
         }
-        #endregion
     }
 }

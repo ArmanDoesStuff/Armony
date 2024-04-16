@@ -10,8 +10,6 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibUserInterface
     {
-        #region Rect
-
         public static void SetListener(this Button button, UnityAction action)
         {
             button.onClick.RemoveAllListeners();
@@ -36,8 +34,8 @@ namespace Armony.Utilities.Libraries
         {
             RectTransform tP = t.parent as RectTransform;
 
-            Vector2 newAnchorsMin = new Vector2(t.anchorMin.x + t.offsetMin.x / tP.rect.width, t.anchorMin.y + t.offsetMin.y / tP.rect.height);
-            Vector2 newAnchorsMax = new Vector2(t.anchorMax.x + t.offsetMax.x / tP.rect.width, t.anchorMax.y + t.offsetMax.y / tP.rect.height);
+            Vector2 newAnchorsMin = new(t.anchorMin.x + t.offsetMin.x / tP.rect.width, t.anchorMin.y + t.offsetMin.y / tP.rect.height);
+            Vector2 newAnchorsMax = new(t.anchorMax.x + t.offsetMax.x / tP.rect.width, t.anchorMax.y + t.offsetMax.y / tP.rect.height);
             t.anchorMin = newAnchorsMin;
             t.anchorMax = newAnchorsMax;
 
@@ -66,10 +64,6 @@ namespace Armony.Utilities.Libraries
             if (!scrollRect.Contains(snap))
                 contentRect.anchoredPosition = (Vector2)scrollRect.InverseTransformPoint(contentRect.position) - new Vector2(0, scrollRect.InverseTransformPoint(snap.position).y);
         }
-
-        #endregion
-
-        #region Other
 
         public static Selectable LinkNavigationVertical(Selectable[] fileBtns)
         {
@@ -114,7 +108,5 @@ namespace Armony.Utilities.Libraries
             cGroup.interactable = cGroup.blocksRaycasts = activeAfter;
             cGroup.gameObject.SetActive(activeAfter);
         }
-
-        #endregion
     }
 }

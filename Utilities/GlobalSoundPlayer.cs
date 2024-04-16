@@ -11,8 +11,7 @@ namespace Armony.Utilities
 {
     public static class GlobalSoundPlayer
     {
-        #region variables
-        public static ConcurrentStack<AudioSource> sources = new ConcurrentStack<AudioSource>();
+        public static ConcurrentStack<AudioSource> Sources = new();
 
         public enum SoundTypes
         {
@@ -23,16 +22,14 @@ namespace Armony.Utilities
             Music
         };
 
-        private static GameObject audioHolder;
-        private static GameObject AudioHolder => audioHolder ??= GameObject.Find("SoundPlayer") ?? new GameObject("SoundPlayer");
+        private static GameObject s_audioHolder;
+        private static GameObject AudioHolder => s_audioHolder ??= GameObject.Find("SoundPlayer") ?? new GameObject("SoundPlayer");
 
-        private static AudioMixer mainMixer;
-        private static AudioMixer MainMixer => mainMixer ??= Resources.Load<AudioMixer>("MainMixer"); //TODO: ??= new AudioMixer()
+        private static AudioMixer s_mainMixer;
+        private static AudioMixer MainMixer => s_mainMixer ??= Resources.Load<AudioMixer>("MainMixer"); //TODO: ??= new AudioMixer()
 
         private static AudioMixerGroup[] MixerGroups => MainMixer.FindMatchingGroups(String.Empty);
-        #endregion
 
-        #region accessors
         public static float[] SoundVolumes
         {
             get
@@ -50,7 +47,7 @@ namespace Armony.Utilities
         {
             get
             {
-                foreach (AudioSource a in sources)
+                foreach (AudioSource a in Sources)
                 {
                     if (a.isPlaying)
                     {
@@ -61,9 +58,6 @@ namespace Armony.Utilities
             }
         }
 
-        #endregion
-
-        #region functions
         public static float GetVolume(SoundTypes soundType)
         {
             float vol;
@@ -116,7 +110,7 @@ namespace Armony.Utilities
 
         private static AudioSource GetAudioSourceFromPool()
         {
-            sources.TryPop(out AudioSource source);
+            Sources.TryPop(out AudioSource source);
             if (source == null)
                 source = AudioHolder.AddComponent<AudioSource>();
             ActivateSource(source);
@@ -129,8 +123,7 @@ namespace Armony.Utilities
             {
                 await Task.Yield();
             }
-            sources.Push(source);
+            Sources.Push(source);
         }
-        #endregion
     }
 }

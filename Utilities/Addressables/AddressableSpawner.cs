@@ -15,7 +15,6 @@ namespace Armony.Utilities.Addressables
         private static readonly Dictionary<AssetReference, AsyncOperationHandle<GameObject>> AsyncOperationHandles = new();
         private static Dictionary<AssetReference, List<GameObject>> SpawnedObjects { get; } = new();
 
-        #region Spawn
         public static async Task<T> LoadAndSpawnAddressable<T>(
             AssetReference aRef,
             Vector3 pos,
@@ -102,16 +101,14 @@ namespace Armony.Utilities.Addressables
             if (autoRelease)
             {
                 AddressableGameObject goAdd = go.AddComponent<AddressableGameObject>();
-                goAdd.assetRef = aRef;
+                goAdd.AssetRef = aRef;
                 goAdd.Destroyed += ReleaseSingle;
             }
 
             action?.Invoke();
             return go;
         }
-        #endregion
 
-        #region Release
         public static void ReleaseAll(AssetReference aRef)
         {
             List<GameObject> spawnedGOs = GetSpawnedAddressables(aRef);
@@ -146,9 +143,7 @@ namespace Armony.Utilities.Addressables
                 SpawnedObjects.Remove(aRef);
             }
         }
-        #endregion
 
-        #region Other
         public static List<GameObject> GetSpawnedAddressables(AssetReference aRef) => AddressableHasBeenSpawned(aRef) ? SpawnedObjects[aRef] : null;
 
         public static List<T> GetSpawnedAddressables<T>(AssetReference aRef)
@@ -166,5 +161,4 @@ namespace Armony.Utilities.Addressables
             return SpawnedObjects.ContainsKey(aRef);
         }
     }
-        #endregion
 }

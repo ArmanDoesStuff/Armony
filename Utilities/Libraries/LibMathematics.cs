@@ -6,13 +6,12 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibMathematics
     {
-        #region Random
         public static Vector3 RandomVec3(float spread = 180)
         {
             return new Vector3(
-                UnityEngine.Random.Range(-spread, spread),
-                UnityEngine.Random.Range(-spread, spread),
-                UnityEngine.Random.Range(-spread, spread)
+                Random.Range(-spread, spread),
+                Random.Range(-spread, spread),
+                Random.Range(-spread, spread)
             );
         }
 
@@ -43,17 +42,15 @@ namespace Armony.Utilities.Libraries
                 RandomPerlinFloatBalanced(seed + 1000000, timeScale)
             );
         }
-        #endregion
 
-        #region Physics
         public static bool RandomChance(float chance)
         {
-            return UnityEngine.Random.Range(0f, 1f) < chance;
+            return Random.Range(0f, 1f) < chance;
         }
 
         public static void RotateRandom(this Transform t)
         {
-            t.rotation = UnityEngine.Random.rotation;
+            t.rotation = Random.rotation;
         }
 
         public static void RotateRandom(this Transform t, float spread)
@@ -85,9 +82,7 @@ namespace Armony.Utilities.Libraries
             }
             return totalImpulse;
         }
-        #endregion
 
-        #region  Other
         public static float AngleBetweenTwoPoints(Vector3 a, Vector3 b)
         {
             return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
@@ -98,6 +93,5 @@ namespace Armony.Utilities.Libraries
             int multiple = Mathf.RoundToInt(numberToRound / multipleOf);
             return multiple * multipleOf;
         }
-        #endregion
     }
 }

@@ -11,12 +11,12 @@ namespace Armony.Utilities.Addressables
         public event Action<AssetReference, GameObject> Destroyed;
 
         [HideInInspector]
-        public AssetReference assetRef;
+        public AssetReference AssetRef;
 
         private void OnDestroy()
         {
             //Calls ReleaseSingle on the AddressableSpawner
-            Destroyed?.Invoke(assetRef, gameObject);
+            Destroyed?.Invoke(AssetRef, gameObject);
         }
     }
 }
