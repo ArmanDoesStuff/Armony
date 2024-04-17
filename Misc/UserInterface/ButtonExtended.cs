@@ -12,8 +12,8 @@ namespace Armony.Misc.UserInterface
     {
 
         [SerializeField]
-        private UnityEvent m_submitted;
-        public UnityEvent Submitted => m_submitted;
+        private UnityEvent m_submittedEvent;
+        public UnityEvent SubmittedEvent => m_submittedEvent;
 
         public delegate void ButtonEvent(bool activate);
         
@@ -22,14 +22,16 @@ namespace Armony.Misc.UserInterface
 
         protected bool Selected { get; private set; }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public override void OnPointerClick(PointerEventData eventData)
         {
-            Submitted?.Invoke();
+            base.OnPointerClick(eventData);
+            Submitted();
         }
 
-        public void OnSubmit(BaseEventData eventData)
+        public override void OnSubmit(BaseEventData eventData)
         {
-            Submitted?.Invoke();
+            base.OnSubmit(eventData);
+            Submitted();
         }
 
         public override void OnSelect(BaseEventData eventData)
@@ -66,6 +68,11 @@ namespace Armony.Misc.UserInterface
         {
             if(Selected) return;
             HighlightedEvent?.Invoke(highlighted);
+        }
+        
+        protected virtual void Submitted()
+        {
+            SubmittedEvent?.Invoke();
         }
     }
 }

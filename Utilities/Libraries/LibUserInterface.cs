@@ -4,18 +4,23 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = System.Object;
 
 namespace Armony.Utilities.Libraries
 {
     public static class LibUserInterface
     {
+        public static Selectable GetCurrentSelectable() =>
+            UnityEngine.Object.FindAnyObjectByType<EventSystem>().currentSelectedGameObject.GetComponent<Selectable>();
+
         public static void SetListener(this Button button, UnityAction action)
         {
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(action);
         }
-        
+
         public static bool Contains(this RectTransform self, RectTransform rect)
         {
             Vector3[] selfCorners = new Vector3[4];

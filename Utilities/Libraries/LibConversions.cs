@@ -36,27 +36,14 @@ namespace Armony.Utilities.Libraries
             return (b ? 1 : -1) * mult;
         }
 
-        public static Color HexToColor(this string hex, float alpha = 1)
+        public static Color HexToColor(string hexCode, float alpha = 1)
         {
-            hex = hex.Trim(new char[] { ' ', '#' });
-            if (hex.Length != 6)
+            if (ColorUtility.TryParseHtmlString("#" + hexCode, out Color color))
             {
-                return new Color(0, 0, 0, 1);
+                return color;
             }
-            else
-            {
-                return new Color(
-                    HexToFloat(hex.Substring(0, 2)),
-                    HexToFloat(hex.Substring(2, 2)),
-                    HexToFloat(hex.Substring(4, 2)),
-                    Mathf.Clamp01(alpha)
-                );
-            }
-        }
-
-        public static float HexToFloat(string hex)
-        {
-            return ((float)int.Parse(hex, System.Globalization.NumberStyles.HexNumber)) / 256f;
+            Debug.LogWarning("Invalid hexadecimal color value: " + hexCode);
+            return Color.magenta;
         }
 
         public static string TimeToString(System.TimeSpan t)
