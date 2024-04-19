@@ -66,7 +66,7 @@ namespace Armony.Utilities.Libraries
 
         public static void AddExplosionForce(this Rigidbody2D rb, float explosionForce, Vector2 explosionPosition)
         {
-            var explosionDir = rb.position - explosionPosition;
+            Vector2 explosionDir = rb.position - explosionPosition;
             rb.AddForce(explosionForce * explosionDir);
         }
 

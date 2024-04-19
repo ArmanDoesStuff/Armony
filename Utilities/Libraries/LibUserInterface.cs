@@ -57,6 +57,12 @@ namespace Armony.Utilities.Libraries
         {
             t.offsetMin = t.offsetMax = new Vector2(0, 0);
         }
+        
+        public static void Maximise(this RectTransform t)
+        {
+            t.AnchorToCanvas();
+            t.AnchorToCorner();
+        }
 
         public static void MoveContentToReveal(this RectTransform snap) =>
             MoveContentToReveal(snap, snap.GetComponentInParent<ScrollRect>());

@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 
-namespace Armony.Utilities.Singletons
+namespace Armony.Utilities
 {
     public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
-        protected static T s_instance;
-
+        private static T s_instance;
         public static T Instance
         {
             get
