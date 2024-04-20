@@ -1,16 +1,16 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class SimpleMoveUI : MonoBehaviour
+namespace Armony.Misc.UserInterface
 {
-    [SerializeField]
-    private float m_rotateSpeed;
-    private float RotateSpeed => m_rotateSpeed;
-    
-    private void Update()
+    public class SimpleMoveUI : MonoBehaviour
     {
-        transform.Rotate(Vector3.back, RotateSpeed * Time.deltaTime);
+        [SerializeField]
+        private float m_rotateSpeed;
+        private float RotateSpeed => m_rotateSpeed;
+    
+        private void Update()
+        {
+            transform.Rotate(Vector3.back, RotateSpeed * Time.deltaTime);
+        }
     }
 }

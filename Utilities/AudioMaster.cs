@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace Armony.Utilities.Audio
+namespace Armony.Utilities
 {
     public enum SoundType
     {
