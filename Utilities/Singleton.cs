@@ -5,7 +5,7 @@ namespace Armony.Utilities
     public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         private static T s_instance;
-        public static T Instance
+        protected static T Instance
         {
             get
             {

@@ -1,4 +1,5 @@
-﻿using Mono.CSharp;
+﻿using System.Collections.Generic;
+using Mono.CSharp;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,8 +13,15 @@ namespace Armony.Utilities.SerializableDictionary
             EditorGUI.BeginProperty(position, label, property);
             SerializedProperty keysProperty = property.FindPropertyRelative("m_keys");
             SerializedProperty valuesProperty = property.FindPropertyRelative("m_values");
-            bool keyIsEnum = keysProperty.arraySize > 0 && keysProperty.GetArrayElementAtIndex(0).propertyType == SerializedPropertyType.Enum;
+            bool keyIsEnum = keysProperty.arraySize > 0 && keysProperty.GetArrayElementAtIndex(0).FindPropertyRelative("key").propertyType == SerializedPropertyType.Enum;
             EditorGUILayout.PrefixLabel(label);
+
+            if (!IsDictionaryValid(keysProperty))
+            {
+                GUIStyle errorStyle = new(GUI.skin.label) { normal = { textColor = Color.red } };
+                EditorGUILayout.LabelField("Dictionary is invalid - Duplicate keys will be ignored", errorStyle);
+            }
+
             EditorGUI.indentLevel++;
             int keyCount = 0;
             if (!keyIsEnum)
@@ -25,11 +33,19 @@ namespace Armony.Utilities.SerializableDictionary
                 EditorGUILayout.EndHorizontal();
             }
 
+            float layoutWidth = EditorGUIUtility.currentViewWidth - EditorGUIUtility.standardVerticalSpacing;
             for (int i = 0; i < keysProperty.arraySize; i++)
             {
+                bool keyIsValid = keysProperty.GetArrayElementAtIndex(i).FindPropertyRelative("isValid").boolValue;
+                GUI.backgroundColor = keyIsValid ? GUI.skin.box.normal.textColor : Color.red;
+                
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(keysProperty.GetArrayElementAtIndex(i), GUIContent.none, GUILayout.Width(EditorGUIUtility.currentViewWidth * .33f - EditorGUIUtility.standardVerticalSpacing));
-                EditorGUILayout.PropertyField(valuesProperty.GetArrayElementAtIndex(i), GUIContent.none, GUILayout.Width(EditorGUIUtility.currentViewWidth * .66f - EditorGUIUtility.standardVerticalSpacing));
+                SerializedProperty key = keysProperty.GetArrayElementAtIndex(i).FindPropertyRelative("key");
+                if (keyIsEnum)
+                    EditorGUILayout.LabelField(key.enumNames[key.enumValueIndex], GUILayout.Width(layoutWidth * .33f));
+                else
+                    EditorGUILayout.PropertyField(key, GUIContent.none, GUILayout.Width(layoutWidth * .33f));
+                EditorGUILayout.PropertyField(valuesProperty.GetArrayElementAtIndex(i), GUIContent.none, GUILayout.Width(layoutWidth * .66f));
                 EditorGUILayout.EndHorizontal();
             }
 
@@ -44,13 +60,19 @@ namespace Armony.Utilities.SerializableDictionary
             EditorGUI.EndProperty();
         }
 
-        private static float GetHeight(SerializedProperty property)
+        private bool IsDictionaryValid(SerializedProperty keysProperty)
         {
-            float totalHeight = EditorGUIUtility.singleLineHeight;
-            if (!property.FindPropertyRelative("m_keys").isExpanded && !property.FindPropertyRelative("m_values").isExpanded) return totalHeight;
-            SerializedProperty keys = property.FindPropertyRelative("m_keys");
-            totalHeight += EditorGUIUtility.singleLineHeight * (keys.arraySize + 2);
-            return totalHeight;
+            for (int i = 0; i < keysProperty.arraySize; i++)
+            {
+                SerializedProperty wrapperProperty = keysProperty.GetArrayElementAtIndex(i);
+                SerializedProperty isValidProperty = wrapperProperty.FindPropertyRelative("isValid");
+                if (!isValidProperty.boolValue)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -12,9 +12,6 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibUserInterface
     {
-        public static Selectable GetCurrentSelectable() =>
-            UnityEngine.Object.FindAnyObjectByType<EventSystem>().currentSelectedGameObject.GetComponent<Selectable>();
-
         public static void SetListener(this Button button, UnityAction action)
         {
             button.onClick.RemoveAllListeners();
@@ -90,8 +87,10 @@ namespace Armony.Utilities.Libraries
             return fileBtns[0];
         }
 
-        public static async Task Fade(this CanvasGroup cGroup, bool endAlpha, float timeTaken = 0.3f, float delay = 0f)
+        public static async Task Fade(this CanvasGroup cGroup, bool endAlpha, bool force = false, float timeTaken = 0.3f, float delay = 0f)
         {
+            if (force)
+                cGroup.alpha = (!endAlpha).ToInt();
             await Fade(cGroup, endAlpha.ToInt(), timeTaken, delay, endAlpha);
         }
 

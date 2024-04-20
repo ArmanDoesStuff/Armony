@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Armony.Utilities.SerializableDictionary
@@ -7,10 +8,23 @@ namespace Armony.Utilities.SerializableDictionary
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        [SerializeField]
-        private List<TKey> m_keys = new();
+        [System.Serializable]
+        public class KeyWrapper
+        {
+            public TKey key;
+            public bool isValid;
 
-        [SerializeField]
+            public KeyWrapper(TKey key, bool isValid = true)
+            {
+                this.key = key;
+                this.isValid = isValid;
+            }
+        }
+
+        [SerializeField, HideInInspector]
+        private List<KeyWrapper> m_keys = new();
+
+        [SerializeField, HideInInspector]
         private List<TValue> m_values = new();
 
         public void OnBeforeSerialize()
@@ -23,20 +37,14 @@ namespace Armony.Utilities.SerializableDictionary
                 for (int i = 0; i < enumValues.Length; i++)
                 {
                     TKey enumValue = (TKey)enumValues.GetValue(i);
-                    m_keys.Add(enumValue);
+                    m_keys.Add(new KeyWrapper(enumValue));
                     m_values.Add(TryGetValue(enumValue, out TValue value) ? value : default);
                 }
+
                 return;
             }
-            if (m_keys.Count == m_values.Count) return;
-            while (m_values.Count < m_keys.Count)
-            {
-                m_values.Add(default);
-            }
-            while (m_values.Count > m_keys.Count)
-            {
-                m_values.RemoveAt(m_values.Count - 1);
-            }
+
+            MatchArrayLengths();
         }
 
         public void OnAfterDeserialize()
@@ -53,13 +61,25 @@ namespace Armony.Utilities.SerializableDictionary
             }
             else
             {
+                MatchArrayLengths();
                 for (int i = 0; i < m_keys.Count; i++)
                 {
-                    if (i < m_values.Count)
-                    {
-                        TryAdd(m_keys[i], m_values[i]);
-                    }
+                    m_keys[i].isValid = TryAdd(m_keys[i].key, m_values[i]);
                 }
+            }
+        }
+
+        private void MatchArrayLengths()
+        {
+            if (m_keys.Count == m_values.Count) return;
+            while (m_values.Count < m_keys.Count)
+            {
+                m_values.Add(default);
+            }
+
+            while (m_values.Count > m_keys.Count)
+            {
+                m_values.RemoveAt(m_values.Count - 1);
             }
         }
     }
