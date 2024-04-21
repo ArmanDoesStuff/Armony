@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Armony.Utilities.Libraries
 {
@@ -96,6 +97,28 @@ namespace Armony.Utilities.Libraries
                     return i;
             }
             return weights.Count - 1;
+        }
+
+        public static async void RunAsync(this Task task)
+        {
+            try
+            {
+                await task;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+        }
+
+        public static void ClearGameObjects<T>(ref List<T> gameObjectsList)
+        where T : MonoBehaviour
+        {
+            foreach (T obj in gameObjectsList)
+            {
+                Object.Destroy(obj.gameObject);
+            }
+            gameObjectsList.Clear();
         }
     }
 }
