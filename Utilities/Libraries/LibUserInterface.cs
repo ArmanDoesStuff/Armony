@@ -17,6 +17,11 @@ namespace Armony.Utilities.Libraries
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(action);
         }
+        
+        public static void Passthrough(this CanvasGroup canvasGroup, bool pass)
+        {
+            canvasGroup.interactable = canvasGroup.blocksRaycasts = !pass;
+        }
 
         public static bool Contains(this RectTransform self, RectTransform rect)
         {

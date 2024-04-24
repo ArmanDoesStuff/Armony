@@ -15,7 +15,20 @@ namespace Armony.Utilities.Addressables
         private static  Dictionary<AssetReference, AsyncOperationHandle<GameObject>> AsyncOperationHandles { get; } = new();
         private static Dictionary<AssetReference, List<GameObject>> SpawnedObjects { get; } = new();
 
-        public static async Task<T> LoadAndSpawnAddressable<T>(
+        public static async Task<T> InstantiateAddressable<T>(
+            this GameObject owner,
+            AssetReference assetReference,
+            bool single = false,
+            bool autoRelease = true,
+            Action action = null
+            )
+            where T : MonoBehaviour
+        {
+            Transform parent = owner.transform;
+            return await InstantiateAddressable<T>(assetReference, parent.position, parent.rotation, parent, single, autoRelease, action);
+        }
+        
+        public static async Task<T> InstantiateAddressable<T>(
             AssetReference assetReference,
             Vector3 position,
             Quaternion rotation,
@@ -26,10 +39,10 @@ namespace Armony.Utilities.Addressables
         )
             where T : MonoBehaviour
         {
-            return (await LoadAndSpawnAddressable(assetReference, position, rotation, parent, single, autoRelease, action)).GetComponent<T>();
+            return (await InstantiateAddressable(assetReference, position, rotation, parent, single, autoRelease, action)).GetComponent<T>();
         }
 
-        public static async Task<GameObject> LoadAndSpawnAddressable(
+        public static async Task<GameObject> InstantiateAddressable(
             AssetReference assetReference,
             Vector3 position,
             Quaternion rotation,
@@ -44,24 +57,17 @@ namespace Armony.Utilities.Addressables
                 Debug.LogError($"Invalid key: {assetReference.RuntimeKey}");
                 return null;
             }
-
             if (!AsyncOperationHandles.ContainsKey(assetReference))
             {
                 AsyncOperationHandles[assetReference] = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(assetReference);
                 return await LoadRefAndSpawn(assetReference, position, rotation, parent, autoRelease, action);
             }
-            else if (!single)
+            if (single) return GetLastSpawnedAddressable(assetReference);
+            if (AsyncOperationHandles[assetReference].IsDone)
             {
-                if (AsyncOperationHandles[assetReference].IsDone)
-                {
-                    return await SpawnFromLoadedRef(assetReference, position, rotation, parent, autoRelease, action);
-                }
-                else
-                {
-                    return await LoadRefAndSpawn(assetReference, position, rotation, parent, autoRelease, action);
-                }
+                return await SpawnFromLoadedRef(assetReference, position, rotation, parent, autoRelease, action);
             }
-            return GetLastSpawnedAddressable(assetReference);
+            return await LoadRefAndSpawn(assetReference, position, rotation, parent, autoRelease, action);
         }
 
         private static async Task<GameObject> LoadRefAndSpawn(
@@ -73,7 +79,7 @@ namespace Armony.Utilities.Addressables
             Action action
         )
         {
-            while (AsyncOperationHandles[assetReference].Status != AsyncOperationStatus.Succeeded)
+            while (AsyncOperationHandles[assetReference].Status == AsyncOperationStatus.None)
                 await Task.Yield();
             return await SpawnFromLoadedRef(assetReference, position, rotation, parent, autoRelease, action);
         }
@@ -88,9 +94,9 @@ namespace Armony.Utilities.Addressables
         )
         {
             AsyncOperationHandle<GameObject> instantiateAsync = assetReference.InstantiateAsync(position, rotation, parent);
-            GameObject go = instantiateAsync.Result;
-            while (instantiateAsync.Status != AsyncOperationStatus.Succeeded)
+            while (instantiateAsync.Status == AsyncOperationStatus.None)
                 await Task.Yield();
+            GameObject go = instantiateAsync.Result;
 
             if (!SpawnedObjects.ContainsKey(assetReference))
             {

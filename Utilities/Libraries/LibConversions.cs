@@ -40,6 +40,7 @@ namespace Armony.Utilities.Libraries
         {
             if (ColorUtility.TryParseHtmlString("#" + hexCode, out Color color))
             {
+                color.a = alpha;
                 return color;
             }
             Debug.LogWarning("Invalid hexadecimal color value: " + hexCode);

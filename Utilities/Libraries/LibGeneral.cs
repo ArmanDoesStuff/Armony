@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace Armony.Utilities.Libraries
 {
-    public static class LibGeneral
+    public static partial class LibGeneral
     {
         public static void QuitGame()
         {
@@ -97,18 +97,6 @@ namespace Armony.Utilities.Libraries
                     return i;
             }
             return weights.Count - 1;
-        }
-
-        public static async void RunAsync(this Task task)
-        {
-            try
-            {
-                await task;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
-            }
         }
 
         public static void ClearGameObjects<T>(ref List<T> gameObjectsList)
