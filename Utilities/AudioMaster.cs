@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Armony.Utilities.Singleton;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -19,8 +20,10 @@ namespace Armony.Utilities
         Music
     };
     
-    public class AudioMaster : Singleton<AudioMaster>
+    public class AudioMaster : MonoBehaviour
     {
+        private static AudioMaster Instance => SingletonManager.GetInstance<AudioMaster>();
+        
         private static readonly ConcurrentStack<AudioSource> Sources = new();
 
         [SerializeField]
