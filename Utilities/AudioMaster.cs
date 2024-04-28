@@ -19,11 +19,11 @@ namespace Armony.Utilities
         Dialogue,
         Music
     };
-    
+
     public class AudioMaster : MonoBehaviour
     {
         private static AudioMaster Instance => SingletonManager.GetInstance<AudioMaster>();
-        
+
         private static readonly ConcurrentStack<AudioSource> Sources = new();
 
         [SerializeField]
@@ -73,7 +73,12 @@ namespace Armony.Utilities
         {
             Sources.TryPop(out AudioSource source);
             if (source == null)
-                source = Instance.gameObject.AddComponent<AudioSource>();
+            {
+                GameObject sourceHolder = new GameObject();
+                sourceHolder.transform.parent = Instance.transform;
+                source = sourceHolder.AddComponent<AudioSource>();
+            }
+
             ActivateSource(source);
             return source;
         }
@@ -96,27 +101,41 @@ namespace Armony.Utilities
             SoundType soundType = SoundType.General,
             float pitch = 1,
             float volume = 1,
-            bool applySoundType = true
+            bool applySoundType = true,
+            Vector3? position = null
         )
         {
             AudioSource audS = AudioMaster.GetAudioSourceFromPool();
+#if UNITY_EDITOR
+            audS.gameObject.name = clip.name;
+#endif
             if (applySoundType)
                 audS.outputAudioMixerGroup = AudioMaster.MixerGroups[(int)soundType];
             audS.clip = clip;
             audS.pitch = pitch;
             audS.volume = volume;
+            if (position.HasValue)
+                audS.gameObject.transform.position = position.Value;
+            audS.spatialBlend = position.HasValue ? 1f : 0f;
             audS.Play();
             return audS;
         }
 
-        public static AudioSource PlayRandom(this AudioClip[] clips, SoundType soundType = SoundType.General, float pitch = 1, float volume = 1)
-        {
-            return Play(clips[UnityEngine.Random.Range(0, clips.Length)], soundType, pitch, volume);
-        }
+        public static AudioSource PlayRandom(
+            this AudioClip[] clips,
+            SoundType soundType = SoundType.General,
+            float pitch = 1, float volume = 1,
+            bool applySoundType = true,
+            Vector3? position = null
+        ) => Play(clips[UnityEngine.Random.Range(0, clips.Length)], soundType, pitch, volume, applySoundType, position);
 
-        public static AudioSource PlayRandom(this List<AudioClip> clips, SoundType soundType = SoundType.General, float pitch = 1, float volume = 1)
-        {
-            return PlayRandom(clips.ToArray(), soundType, pitch, volume);
-        }
+        public static AudioSource PlayRandom(
+            this List<AudioClip> clips,
+            SoundType soundType = SoundType.General,
+            float pitch = 1,
+            float volume = 1,
+            bool applySoundType = true,
+            Vector3? position = null
+        ) => PlayRandom(clips.ToArray(), soundType, pitch, volume, applySoundType, position);
     }
 }
