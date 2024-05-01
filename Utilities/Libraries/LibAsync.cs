@@ -20,8 +20,7 @@ namespace Armony.Utilities.Libraries
         
         public static Task Task(this AsyncOperation asyncOperation)
         {
-            TaskCompletionSource<object> taskCompletionSource = new TaskCompletionSource<object>();
-
+            TaskCompletionSource<object> taskCompletionSource = new();
             asyncOperation.completed += (operation) =>
             {
                 if (operation.isDone)

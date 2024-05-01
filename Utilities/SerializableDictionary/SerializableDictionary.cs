@@ -8,7 +8,7 @@ namespace Armony.Utilities.SerializableDictionary
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        [System.Serializable]
+        [Serializable]
         public class KeyWrapper
         {
             public TKey key;
