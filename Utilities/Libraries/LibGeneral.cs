@@ -108,5 +108,12 @@ namespace Armony.Utilities.Libraries
             }
             gameObjectsList.Clear();
         }
+        public static void DestroyAllChildren(this Transform parent)
+        {
+            foreach (Transform child in parent)
+            {
+                Object.Destroy(child.gameObject);
+            }
+        }
     }
 }

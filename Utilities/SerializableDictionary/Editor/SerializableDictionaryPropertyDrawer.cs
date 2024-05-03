@@ -1,15 +1,21 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Armony.Utilities.SerializableDictionary.Editor
 {
     [CustomPropertyDrawer(typeof(SerializableDictionary<,>), true)]
     public class SerializableDictionaryPropertyDrawer : PropertyDrawer
     {
+        private bool ShowProperty { get; set; } = true;
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            EditorGUI.PrefixLabel(position, label);
+            Rect foldoutPosition = new(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+            ShowProperty = EditorGUI.Foldout(foldoutPosition, ShowProperty, label);
             position.y += EditorGUIUtility.singleLineHeight;
+            if (!ShowProperty) return;
             EditorGUI.BeginProperty(position, label, property);
             SerializedProperty keysProperty = property.FindPropertyRelative("m_keys");
             SerializedProperty valuesProperty = property.FindPropertyRelative("m_values");
@@ -55,7 +61,6 @@ namespace Armony.Utilities.SerializableDictionary.Editor
                 }
 
                 EditorGUI.PropertyField(valueRect, valuesProperty.GetArrayElementAtIndex(i), GUIContent.none);
-
                 position.y += EditorGUIUtility.singleLineHeight;
             }
 
@@ -87,7 +92,13 @@ namespace Armony.Utilities.SerializableDictionary.Editor
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             SerializedProperty keysProperty = property.FindPropertyRelative("m_keys");
-            return EditorGUIUtility.singleLineHeight * (keysProperty.arraySize + 2) + EditorGUIUtility.standardVerticalSpacing;
+            float height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            if (ShowProperty)
+            {
+                height += EditorGUIUtility.singleLineHeight * keysProperty.arraySize;
+            }
+
+            return height;
         }
     }
 }

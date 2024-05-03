@@ -2,7 +2,8 @@
     "name": "Armony.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:c19261b30026a9b4e89f7449098dc8cd"
+        "GUID:c19261b30026a9b4e89f7449098dc8cd",
+        "GUID:9e24947de15b9834991c9d8411ea37cf"
     ],
     "includePlatforms": [
         "Editor"
