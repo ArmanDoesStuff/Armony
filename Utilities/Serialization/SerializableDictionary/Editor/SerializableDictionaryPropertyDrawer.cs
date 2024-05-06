@@ -1,9 +1,8 @@
-﻿using System;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+using static Armony.Utilities.Libraries.LibUserInterface;
 
-namespace Armony.Utilities.SerializableDictionary.Editor
+namespace Armony.Utilities.Serialization.Editor
 {
     [CustomPropertyDrawer(typeof(SerializableDictionary<,>), true)]
     public class SerializableDictionaryPropertyDrawer : PropertyDrawer
@@ -53,7 +52,7 @@ namespace Armony.Utilities.SerializableDictionary.Editor
                 Rect valueRect = new(position.x + position.width * 0.3f, position.y, position.width * 0.7f, EditorGUIUtility.singleLineHeight);
                 if (keyIsEnum)
                 {
-                    EditorGUI.LabelField(keyRect, key.enumNames[key.enumValueIndex]);
+                    EditorGUI.LabelField(keyRect, PascalSpace(key.enumNames[key.enumValueIndex]));
                 }
                 else
                 {

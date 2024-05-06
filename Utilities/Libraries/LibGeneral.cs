@@ -115,5 +115,11 @@ namespace Armony.Utilities.Libraries
                 Object.Destroy(child.gameObject);
             }
         }
+        
+        public static bool TryGetComponentInParent<T>(this Component gameObject, out T parentComponent)
+        {
+            parentComponent = gameObject.GetComponentInParent<T>();
+            return parentComponent != null;
+        }
     }
 }

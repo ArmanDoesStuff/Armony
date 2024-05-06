@@ -17,7 +17,7 @@ namespace Armony.Utilities.Libraries
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(action);
         }
-        
+
         public static void Passthrough(this CanvasGroup canvasGroup, bool pass)
         {
             canvasGroup.interactable = canvasGroup.blocksRaycasts = !pass;
@@ -59,17 +59,25 @@ namespace Armony.Utilities.Libraries
         {
             t.offsetMin = t.offsetMax = new Vector2(0, 0);
         }
-        
+
         public static void Maximise(this RectTransform t)
         {
             t.AnchorToCanvas();
             t.AnchorToCorner();
         }
 
-        public static void MoveContentToReveal(this RectTransform snap) =>
-            MoveContentToReveal(snap, snap.GetComponentInParent<ScrollRect>());
+        /// <summary>
+        /// Moves the content of a ScrollRect to ensure the selected item is seen.
+        /// Used OnSelect for buttons in a ScrollRect
+        /// </summary>
+        /// <param name="snap"></param>
+        public static void MoveContentToReveal(this RectTransform snap)
+        {
+            if (snap.TryGetComponentInParent(out ScrollRect scrollRect))
+                MoveContentToReveal(snap, scrollRect);
+        }
 
-        public static void MoveContentToReveal(this RectTransform snap, ScrollRect scroll)
+        private static void MoveContentToReveal(this RectTransform snap, ScrollRect scroll)
         {
             RectTransform scrollRect = (RectTransform)scroll.transform;
             RectTransform contentRect = scroll.content;
@@ -122,6 +130,30 @@ namespace Armony.Utilities.Libraries
 
             cGroup.interactable = cGroup.blocksRaycasts = activeAfter;
             cGroup.gameObject.SetActive(activeAfter);
+        }
+
+        /// <summary>
+        /// Adds a space before capital letters for use with Pascal case names
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string PascalSpace(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            System.Text.StringBuilder stringBuilder = new(text.Length * 2);
+            stringBuilder.Append(text[0]);
+
+            for (int i = 1; i < text.Length; i++)
+            {
+                if (char.IsUpper(text[i]) &&
+                    (char.IsLower(text[i - 1]) || char.IsDigit(text[i - 1]) || char.IsPunctuation(text[i - 1]) || !char.IsUpper(text[i - 1])))
+                    stringBuilder.Append(' ');
+                stringBuilder.Append(text[i]);
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }
