@@ -11,15 +11,19 @@ namespace Armony.Misc.UserInterface
         {
             ScrollRect s = GetComponentInParent<ScrollRect>();
             if (s == null)
+            {
                 Debug.LogError("No ScrollRect found above " + gameObject.name);
-            else
-                GetComponent<ButtonExtended>().SelectedEvent += selected =>
+                return;
+            }
+
+            RectTransform rect = GetComponent<RectTransform>();
+            GetComponent<ButtonExtended>().SelectedEvent += selected =>
+            {
+                if (selected)
                 {
-                    if(selected)
-                    {
-                        GetComponent<RectTransform>().MoveContentToReveal();
-                    }
-                };
+                    rect.MoveContentToReveal();
+                }
+            };
         }
     }
 }

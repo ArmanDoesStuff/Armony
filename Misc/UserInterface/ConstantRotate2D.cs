@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Armony.Misc.UserInterface
 {
-    public class SimpleMoveUI : MonoBehaviour
+    public class ConstantRotate2D : MonoBehaviour
     {
         [SerializeField]
         private float m_rotateSpeed;
