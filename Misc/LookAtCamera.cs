@@ -15,9 +15,9 @@ namespace Armony.Misc
         private void Update()
         {
             if (PlayerCamera == null) return;
-            Vector3 lookDirection = transform.position - PlayerCamera.position ;
-            lookDirection.y = 0;
-            transform.rotation = Quaternion.LookRotation(lookDirection);
+            Vector3 targetPosition = PlayerCamera.transform.position;
+            targetPosition.y = transform.position.y;
+            transform.rotation = Quaternion.LookRotation(transform.position - targetPosition);
         }
     }
 }

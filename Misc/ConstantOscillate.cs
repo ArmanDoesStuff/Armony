@@ -17,14 +17,14 @@ namespace Armony.Misc
 
         private void Start()
         {
-            InitialPosition = transform.position;
+            InitialPosition = transform.localPosition;
             Timer += Random.Range(0f, 1f); //Start randomly along path
         }
 
         private void Update()
         {
             Timer += Time.deltaTime / TimeTaken;
-            transform.position = InitialPosition + Offset * Mathf.Sin(Timer);
+            transform.localPosition = InitialPosition + Offset * Mathf.Sin(Timer);
         }
     }
 }
