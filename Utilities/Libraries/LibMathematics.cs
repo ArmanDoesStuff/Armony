@@ -93,5 +93,13 @@ namespace Armony.Utilities.Libraries
             int multiple = Mathf.RoundToInt(numberToRound / multipleOf);
             return multiple * multipleOf;
         }
+        
+        public static float GetDiagonality(Vector2 vector)
+        {
+            if (vector == Vector2.zero) return 0f;
+            float absX = Mathf.Abs(vector.x);
+            float absY = Mathf.Abs(vector.y);
+            return Mathf.Min(absX, absY) / Mathf.Max(absX, absY);
+        }
     }
 }
