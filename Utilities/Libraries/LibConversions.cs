@@ -26,14 +26,14 @@ namespace Armony.Utilities.Libraries
             return new Color(f, f, f, a);
         }
 
-        public static int ToInt(this bool b, int mult = 1)
+        public static int ToInt(this bool b)
         {
-            return (b ? 1 : 0) * mult;
+            return b ? 1 : 0;
         }
 
-        public static int ToIntNegative(this bool b, int mult = 1)
+        public static int ToIntNegative(this bool b)
         {
-            return (b ? 1 : -1) * mult;
+            return b ? 1 : -1;
         }
 
         public static Color HexToColor(string hexCode, float alpha = 1)
