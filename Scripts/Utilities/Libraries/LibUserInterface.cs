@@ -117,8 +117,7 @@ namespace Armony.Utilities.Libraries
 
             float startAlpha = cGroup.alpha;
             float timer = 0;
-            timer = 0;
-            cGroup.interactable = cGroup.blocksRaycasts = false;
+            cGroup.interactable = false;
             while (timer <= 1)
             {
                 cGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, timer);
@@ -128,7 +127,7 @@ namespace Armony.Utilities.Libraries
 
             cGroup.alpha = endAlpha;
 
-            cGroup.interactable = cGroup.blocksRaycasts = activeAfter;
+            cGroup.interactable = activeAfter;
             cGroup.gameObject.SetActive(activeAfter);
         }
 
