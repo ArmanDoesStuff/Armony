@@ -30,5 +30,17 @@ namespace Armony.Utilities.Libraries
             };
             return clientRpcParams;
         }
+
+        public static ClientRpcParams TargetClients(params ulong[] targetClientIds)
+        {
+            ClientRpcParams clientRpcParams = new()
+            {
+                Send = new ClientRpcSendParams()
+                {
+                    TargetClientIds = targetClientIds
+                }
+            };
+            return clientRpcParams;
+        }
     }
 }
