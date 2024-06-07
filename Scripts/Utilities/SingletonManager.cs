@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Armony.Utilities.Singleton
@@ -19,10 +20,14 @@ namespace Armony.Utilities.Singleton
             T newSingleton = Object.FindAnyObjectByType<T>();
             if (newSingleton == null)
             {
-                GameObject singletonObject = new();
+                GameObject singletonObject = new(typeof(T).Name)
+                {
+                    transform =
+                    {
+                        parent = GetSingletonHolder()
+                    }
+                };
                 newSingleton = singletonObject.AddComponent<T>();
-                singletonObject.name = typeof(T).ToString();
-                singletonObject.transform.parent = GetSingletonHolder();
             }
 
             Singletons.Add(typeof(T), newSingleton);
