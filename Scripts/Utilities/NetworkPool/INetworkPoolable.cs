@@ -1,0 +1,18 @@
+﻿using Unity.Netcode;
+using UnityEngine;
+
+namespace Armony.Scripts.Utilities.NetworkPool
+{
+    public interface INetworkPoolable
+    {
+        public int Index { get; set; }
+
+        void RequestRelease();
+        
+        void Release();
+
+        void Get(Vector3 position, Quaternion rotation);
+
+        GameObject Initialize(Transform parent);
+    }
+}

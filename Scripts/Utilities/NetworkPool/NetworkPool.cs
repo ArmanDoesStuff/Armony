@@ -8,7 +8,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
 {
     public class NetworkPool : NetworkBehaviour
     {
-        private NetworkPoolable[] PooledObjects { get; set; }
+        private INetworkPoolable[] PooledObjects { get; set; }
         private int m_lastIndex;
         private int LastIndex
         {
@@ -18,7 +18,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
 
         public void Construct(int poolCapacity)
         {
-            PooledObjects = new NetworkPoolable[poolCapacity];
+            PooledObjects = new INetworkPoolable[poolCapacity];
             LastIndex = 0;
         }
 
@@ -30,19 +30,15 @@ namespace Armony.Scripts.Utilities.NetworkPool
         }
 
         public T GetPooledObject<T>(T poolableType, Vector3 position, Quaternion rotation, int objectIndex)
-        where T : NetworkPoolable
+            where T : INetworkPoolable
         {
             if (PooledObjects[objectIndex] == null)
             {
-                PooledObjects[objectIndex] = Instantiate(poolableType, parent: transform);
+                PooledObjects[objectIndex] = poolableType.Initialize(transform).GetComponent<T>();
                 PooledObjects[objectIndex].Index = objectIndex;
             }
 
-            Transform poolableTransform = PooledObjects[objectIndex].transform;
-            poolableTransform.position = position;
-            poolableTransform.rotation = rotation;
-
-            PooledObjects[objectIndex].Get();
+            PooledObjects[objectIndex].Get(position, rotation);
             return (T)PooledObjects[objectIndex];
         }
 
@@ -51,7 +47,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
         {
             ReleasePooledObjectClientRpc(index);
         }
-        
+
         [ClientRpc]
         private void ReleasePooledObjectClientRpc(int index)
         {
