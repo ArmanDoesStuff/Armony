@@ -18,11 +18,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
 
         public int IncrementIndex()
         {
-            if (AvailableIndexes.Count == 0)
-            {
-                AvailableIndexes.Enqueue(PooledObjects.Count);
-                Debug.LogWarning("Adding to projectile queue", this);
-            }
+            if (AvailableIndexes.Count == 0) AvailableIndexes.Enqueue(PooledObjects.Count);
             return AvailableIndexes.Dequeue();
         }
 
