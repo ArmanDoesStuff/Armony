@@ -49,10 +49,8 @@ namespace Armony.Scripts.Utilities.NetworkPool
         [ClientRpc]
         private void ReleasePooledObjectClientRpc(int index)
         {
-            if (PooledObjects.Count >= index && PooledObjects[index] != null)
-            {
+            if (index >= PooledObjects.Count || PooledObjects[index] == null) return;
                 PooledObjects[index].Release();
-            }
         }
     }
 }

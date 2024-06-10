@@ -121,5 +121,11 @@ namespace Armony.Utilities.Libraries
             parentComponent = gameObject.GetComponentInParent<T>();
             return parentComponent != null;
         }
+        
+        public static T Random<T>(this IEnumerable<T> enumerable)
+        {
+            T[] array = enumerable.ToArray();
+            return array[UnityEngine.Random.Range(0, array.Length)];
+        }
     }
 }
