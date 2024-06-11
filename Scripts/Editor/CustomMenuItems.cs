@@ -14,7 +14,7 @@ namespace Armony.Editor
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
             if (prefab != null)
             {
-                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, ((GameObject)menuCommand.context).transform);
+                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, ((GameObject)menuCommand.context)?.transform);
                 if (instance != null)
                 {
                     PrefabUtility.UnpackPrefabInstance(instance, PrefabUnpackMode.Completely, InteractionMode.UserAction);

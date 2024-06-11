@@ -6,7 +6,7 @@ namespace Armony.Utilities.Singleton
 {
     public static class SingletonManager
     {
-        private static Dictionary<System.Type, MonoBehaviour> Singletons { get; set; } = new();
+        private static Dictionary<System.Type, MonoBehaviour> Singletons { get; } = new();
         private static Transform SingletonHolder { get; set; }
 
         public static T GetInstance<T>()

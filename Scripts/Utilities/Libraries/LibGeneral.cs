@@ -30,6 +30,7 @@ namespace Armony.Utilities.Libraries
                     UnityEngine.SceneManagement.SceneUtility.GetScenePathByBuildIndex(i + startIndex)
                 );
             }
+
             return sList;
         }
 
@@ -45,6 +46,7 @@ namespace Armony.Utilities.Libraries
             {
                 i += count;
             }
+
             return i % count;
         }
 
@@ -57,6 +59,7 @@ namespace Armony.Utilities.Libraries
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -78,6 +81,7 @@ namespace Armony.Utilities.Libraries
             {
                 await Task.Yield();
             }
+
             f();
         }
 
@@ -96,32 +100,45 @@ namespace Armony.Utilities.Libraries
                 if (totalWeight <= 0)
                     return i;
             }
+
             return weights.Count - 1;
         }
 
         public static void ClearGameObjects<T>(ref List<T> gameObjectsList)
-        where T : MonoBehaviour
+            where T : MonoBehaviour
         {
             foreach (T obj in gameObjectsList)
             {
                 Object.Destroy(obj.gameObject);
             }
+
             gameObjectsList.Clear();
         }
-        public static void DestroyAllChildren(this Transform parent)
+
+        public static void DestroyAllChildren(this Transform parent, bool immediate = false)
         {
+            if (!immediate)
+            {
+                foreach (Transform child in parent)
+                {
+                    Object.Destroy(child.gameObject);
+                }
+
+                return;
+            }
+
             foreach (Transform child in parent)
             {
-                Object.Destroy(child.gameObject);
+                Object.DestroyImmediate(child.gameObject);
             }
         }
-        
+
         public static bool TryGetComponentInParent<T>(this Component gameObject, out T parentComponent)
         {
             parentComponent = gameObject.GetComponentInParent<T>();
             return parentComponent != null;
         }
-        
+
         public static T Random<T>(this IEnumerable<T> enumerable)
         {
             T[] array = enumerable.ToArray();
