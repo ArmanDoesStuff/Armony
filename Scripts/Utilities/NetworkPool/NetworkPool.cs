@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Armony.Utilities.Libraries;
 using Armony.Utilities.Singleton;
 using Unity.Netcode;
 using UnityEngine;
@@ -38,19 +39,27 @@ namespace Armony.Scripts.Utilities.NetworkPool
             return (T)PooledObjects[objectIndex];
         }
 
+        public void ReleasePooledObject(int index)
+        {
+            ReleaseLocal(index);
+            ReleasePooledObjectServerRpc(index);
+        }
+
         [ServerRpc(RequireOwnership = false)]
-        public void ReleasePooledObjectServerRpc(int index)
+        private void ReleasePooledObjectServerRpc(int index, ServerRpcParams rpcParams = default)
         {
             if (AvailableIndexes.Contains(index)) return;
             AvailableIndexes.Enqueue(index);
-            ReleasePooledObjectClientRpc(index);
+            ReleasePooledObjectClientRpc(index, LibServer.SendExceptCaller(rpcParams));
         }
 
         [ClientRpc]
-        private void ReleasePooledObjectClientRpc(int index)
+        private void ReleasePooledObjectClientRpc(int index, ClientRpcParams rpcParams)
         {
             if (index >= PooledObjects.Count || PooledObjects[index] == null) return;
-                PooledObjects[index].Release();
+            ReleaseLocal(index);
         }
+
+        private void ReleaseLocal(int index) => PooledObjects[index].Release();
     }
 }
