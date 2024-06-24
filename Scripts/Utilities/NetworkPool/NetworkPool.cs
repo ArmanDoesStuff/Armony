@@ -10,29 +10,27 @@ namespace Armony.Scripts.Utilities.NetworkPool
 {
     public class NetworkPool : NetworkBehaviour
     {
-        private List<INetworkPoolable> PooledObjects { get; } = new();
-        private Queue<int> AvailableIndexes { get; } = new();
+        private INetworkPoolable[] PooledObjects { get; set; }
+        private int CurrentIndex { get; set; }
 
         public void Construct(int poolCapacity)
         {
+            PooledObjects = new INetworkPoolable[poolCapacity];
         }
 
         public int IncrementIndex()
         {
-            if (AvailableIndexes.Count == 0) AvailableIndexes.Enqueue(PooledObjects.Count);
-            return AvailableIndexes.Dequeue();
+            CurrentIndex = (CurrentIndex + 1) % PooledObjects.Length;
+            return CurrentIndex;
         }
 
         public T GetPooledObject<T>(T poolableType, Vector3 position, Quaternion rotation, int objectIndex)
             where T : INetworkPoolable
         {
-            if (objectIndex >= PooledObjects.Count)
+            if (PooledObjects[objectIndex] == null)
             {
-                for (int i = PooledObjects.Count; i <= objectIndex; i++)
-                {
-                    PooledObjects.Add(poolableType.Initialize(transform).GetComponent<T>());
-                    PooledObjects[i].Index = i;
-                }
+                PooledObjects[objectIndex] = poolableType.Initialize(transform).GetComponent<T>();
+                PooledObjects[objectIndex].Index = objectIndex;
             }
 
             PooledObjects[objectIndex].Get(position, rotation);
@@ -46,17 +44,13 @@ namespace Armony.Scripts.Utilities.NetworkPool
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void ReleasePooledObjectServerRpc(int index, ServerRpcParams rpcParams = default)
-        {
-            if (AvailableIndexes.Contains(index)) return;
-            AvailableIndexes.Enqueue(index);
+        private void ReleasePooledObjectServerRpc(int index, ServerRpcParams rpcParams = default) =>
             ReleasePooledObjectClientRpc(index, LibServer.SendExceptCaller(rpcParams));
-        }
 
         [ClientRpc]
         private void ReleasePooledObjectClientRpc(int index, ClientRpcParams rpcParams)
         {
-            if (index >= PooledObjects.Count || PooledObjects[index] == null) return;
+            if (index >= PooledObjects.Length || PooledObjects[index] == null) return;
             ReleaseLocal(index);
         }
 
