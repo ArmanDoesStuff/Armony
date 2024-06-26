@@ -1,21 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using Armony.Utilities.Libraries;
-using Armony.Utilities.Singleton;
+﻿using Armony.Utilities.Libraries;
 using Unity.Netcode;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Armony.Scripts.Utilities.NetworkPool
 {
     public class NetworkPool : NetworkBehaviour
     {
+        private INetworkPoolUser NetworkPoolUser { get; set; }
         private INetworkPoolable[] PooledObjects { get; set; }
         private int CurrentIndex { get; set; }
 
-        public void Construct(int poolCapacity)
+        private Transform Holder { get; set; }
+
+        public void Construct(int poolCapacity, INetworkPoolUser networkPoolUser)
         {
+            if (PooledObjects != null)
+            {
+                foreach (INetworkPoolable poolable in PooledObjects)
+                {
+                    poolable?.Deinitialize();
+                }
+            }
+            else
+            {
+                Holder = new GameObject("NetworkPool").transform;
+            }
+
+            NetworkPoolUser = networkPoolUser;
             PooledObjects = new INetworkPoolable[poolCapacity];
+            Holder.parent = transform;
         }
 
         public int IncrementIndex()
@@ -29,7 +42,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
         {
             if (PooledObjects[objectIndex] == null)
             {
-                PooledObjects[objectIndex] = poolableType.Initialize(transform).GetComponent<T>();
+                PooledObjects[objectIndex] = poolableType.Initialize(Holder, NetworkPoolUser).GetComponent<T>();
                 PooledObjects[objectIndex].Index = objectIndex;
             }
 

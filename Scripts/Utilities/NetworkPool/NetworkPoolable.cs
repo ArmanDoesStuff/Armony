@@ -1,5 +1,4 @@
-﻿using Unity.Netcode;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Armony.Scripts.Utilities.NetworkPool
 {
@@ -10,9 +9,12 @@ namespace Armony.Scripts.Utilities.NetworkPool
         void RequestRelease();
         
         void Release();
+        
 
         void Get(Vector3 position, Quaternion rotation);
 
-        GameObject Initialize(Transform parent);
+        GameObject Initialize(Transform holder, INetworkPoolUser parent);
+
+        void Deinitialize();
     }
 }
