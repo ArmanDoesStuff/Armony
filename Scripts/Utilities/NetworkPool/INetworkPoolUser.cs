@@ -3,6 +3,6 @@
     public interface INetworkPoolUser
     {
         NetworkPool NetworkPool { get; set; }
-        public void ReleaseProjectile(int index);
+        void ReleaseProjectile(int index);
     }
 }
