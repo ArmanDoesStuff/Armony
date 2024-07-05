@@ -1,4 +1,5 @@
-﻿using Armony.Utilities.Libraries;
+﻿using System;
+using Armony.Utilities.Libraries;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -24,10 +25,10 @@ namespace Armony.Scripts.Utilities.NetworkPool
             else
             {
                 Holder = new GameObject("NetworkPool").transform;
+                PooledObjects = new INetworkPoolable[poolCapacity];
             }
 
             NetworkPoolUser = networkPoolUser;
-            PooledObjects = new INetworkPoolable[poolCapacity];
             Holder.parent = transform;
         }
 
@@ -48,6 +49,11 @@ namespace Armony.Scripts.Utilities.NetworkPool
 
             PooledObjects[objectIndex].Get(position, rotation);
             return (T)PooledObjects[objectIndex];
+        }
+
+        public void ClearPoolable(int index)
+        {
+            PooledObjects[index] = null;
         }
 
         public void ReleasePooledObject(int index)

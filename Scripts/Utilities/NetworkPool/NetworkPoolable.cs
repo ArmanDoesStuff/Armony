@@ -10,7 +10,6 @@ namespace Armony.Scripts.Utilities.NetworkPool
         
         void Release();
         
-
         void Get(Vector3 position, Quaternion rotation);
 
         GameObject Initialize(Transform holder, INetworkPoolUser parent);

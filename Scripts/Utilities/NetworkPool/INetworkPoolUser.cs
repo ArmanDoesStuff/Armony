@@ -4,5 +4,6 @@
     {
         NetworkPool NetworkPool { get; set; }
         void ReleaseProjectile(int index);
+        void ClearFromPool(int index);
     }
 }
