@@ -31,17 +31,7 @@ namespace Armony.Utilities.Serialization
         {
             if (typeof(TKey).IsEnum)
             {
-                m_keys.Clear();
-                m_values.Clear();
-                Array enumValues = Enum.GetValues(typeof(TKey));
-                for (int i = 0; i < enumValues.Length; i++)
-                {
-                    TKey enumValue = (TKey)enumValues.GetValue(i);
-                    m_keys.Add(new KeyWrapper(enumValue));
-                    m_values.Add(TryGetValue(enumValue, out TValue value) ? value : default);
-                }
-
-                return;
+                m_keys = Enum.GetValues(typeof(TKey)).Cast<TKey>().Select(enumValue => new KeyWrapper(enumValue)).ToList();
             }
 
             MatchArrayLengths();
@@ -55,6 +45,7 @@ namespace Armony.Utilities.Serialization
                 Array enumValues = Enum.GetValues(typeof(TKey));
                 for (int i = 0; i < enumValues.Length; i++)
                 {
+                    if(m_values.Count <= i) return;
                     TKey enumValue = (TKey)enumValues.GetValue(i);
                     Add(enumValue, m_values[i] == null ? default : m_values[i]);
                 }
