@@ -27,6 +27,10 @@ namespace Armony.Utilities
         private static readonly ConcurrentStack<AudioSource> Sources = new();
 
         [SerializeField]
+        private AnimationCurve m_falloffCurve;
+        internal static AnimationCurve FalloffCurve => Instance.m_falloffCurve;
+        
+        [SerializeField]
         private AudioMixer m_mainMixer;
         private AudioMixer MainMixer => m_mainMixer;
 
@@ -74,9 +78,15 @@ namespace Armony.Utilities
             Sources.TryPop(out AudioSource source);
             if (source == null)
             {
-                GameObject sourceHolder = new GameObject();
-                sourceHolder.transform.parent = Instance.transform;
+                GameObject sourceHolder = new()
+                {
+                    transform =
+                    {
+                        parent = Instance.transform
+                    }
+                };
                 source = sourceHolder.AddComponent<AudioSource>();
+                source.SetFalloff();
             }
 
             ActivateSource(source);
@@ -96,6 +106,8 @@ namespace Armony.Utilities
 
     public static class AudioClipExtensions
     {
+        public static float DefaultSpatialBlend = 1f;
+
         public static AudioSource Play(
             this AudioClip clip,
             SoundType soundType = SoundType.General,
@@ -116,7 +128,7 @@ namespace Armony.Utilities
             audS.volume = volume;
             if (position.HasValue)
                 audS.gameObject.transform.position = position.Value;
-            audS.spatialBlend = position.HasValue ? 1f : 0f;
+            audS.spatialBlend = position.HasValue ? DefaultSpatialBlend : 0f;
             audS.Play();
             return audS;
         }
@@ -137,5 +149,13 @@ namespace Armony.Utilities
             bool applySoundType = true,
             Vector3? position = null
         ) => PlayRandom(clips.ToArray(), soundType, pitch, volume, applySoundType, position);
+
+        public static void SetFalloff(this AudioSource source, float maxDistance = 30f)
+        {
+            source.rolloffMode = AudioRolloffMode.Custom;
+            source.maxDistance = maxDistance;
+            source.spatialBlend = DefaultSpatialBlend;
+            source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, AudioMaster.FalloffCurve);
+        }
     }
 }
