@@ -150,11 +150,11 @@ namespace Armony.Utilities
             Vector3? position = null
         ) => PlayRandom(clips.ToArray(), soundType, pitch, volume, applySoundType, position);
 
-        public static void SetFalloff(this AudioSource source, float maxDistance = 30f)
+        public static void SetFalloff(this AudioSource source, float maxDistance = 30f, float? spatialBlend = null)
         {
             source.rolloffMode = AudioRolloffMode.Custom;
             source.maxDistance = maxDistance;
-            source.spatialBlend = DefaultSpatialBlend;
+            source.spatialBlend = spatialBlend ?? DefaultSpatialBlend;
             source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, AudioMaster.FalloffCurve);
         }
     }
