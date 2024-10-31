@@ -9,7 +9,7 @@ using Armony.Utilities.Singleton;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace Armony.Utilities
+namespace Armony.Utilities.Audio
 {
     public enum SoundType
     {
@@ -98,6 +98,8 @@ namespace Armony.Utilities
             while (source.isPlaying)
             {
                 await Task.Yield();
+                if(source == null)
+                    return;
             }
 
             Sources.Push(source);
