@@ -6,6 +6,11 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibMathematics
     {
+        public static bool VectorWithinRange(this Vector3 first, Vector3 second, float range = 0.001f)
+        {
+            return Vector3.SqrMagnitude(first - second) < range * range;
+        }
+        
         public static Vector3 RandomVec3(float spread = 180)
         {
             return new Vector3(
