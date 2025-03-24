@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace Armony.Utilities.Singleton
@@ -9,7 +8,7 @@ namespace Armony.Utilities.Singleton
         private static Dictionary<System.Type, MonoBehaviour> Singletons { get; } = new();
         private static Transform SingletonHolder { get; set; }
 
-        public static T GetInstance<T>()
+        public static T GetInstance<T>() 
             where T : MonoBehaviour
         {
             if (Singletons.TryGetValue(typeof(T), out MonoBehaviour singleton))
@@ -36,12 +35,9 @@ namespace Armony.Utilities.Singleton
 
         private static Transform GetSingletonHolder()
         {
-            if (!SingletonHolder)
-            {
-                SingletonHolder = new GameObject("SingletonHolder").transform;
-                Object.DontDestroyOnLoad(SingletonHolder.gameObject);
-            }
-
+            if (SingletonHolder) return SingletonHolder;
+            SingletonHolder = new GameObject("SingletonHolder").transform;
+            Object.DontDestroyOnLoad(SingletonHolder.gameObject);
             return SingletonHolder;
         }
     }

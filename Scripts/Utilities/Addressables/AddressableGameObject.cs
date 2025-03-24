@@ -1,5 +1,5 @@
 //AWAN SOFTWORKS LTD 2022
-
+#if ADDRESSABLES_ENABLED
 using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -20,3 +20,4 @@ namespace Armony.Utilities.Addressables
         }
     }
 }
+#endif

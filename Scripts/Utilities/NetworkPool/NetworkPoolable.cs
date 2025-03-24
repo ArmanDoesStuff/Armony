@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if NETCODE_ENABLED
+using UnityEngine;
 
 namespace Armony.Scripts.Utilities.NetworkPool
 {
@@ -17,3 +18,4 @@ namespace Armony.Scripts.Utilities.NetworkPool
         void Deinitialize();
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NETCODE_ENABLED
+using System;
 using Armony.Utilities.Libraries;
 using Unity.Netcode;
 using UnityEngine;
@@ -76,3 +77,4 @@ namespace Armony.Scripts.Utilities.NetworkPool
         private void ReleaseLocal(int index) => PooledObjects[index].Release();
     }
 }
+#endif

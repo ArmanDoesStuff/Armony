@@ -1,5 +1,5 @@
 //AWAN SOFTWORKS LTD 2022
-
+#if ADDRESSABLES_ENABLED
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -168,3 +168,4 @@ namespace Armony.Utilities.Addressables
         }
     }
 }
+#endif

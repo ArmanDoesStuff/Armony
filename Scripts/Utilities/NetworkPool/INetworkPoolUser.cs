@@ -1,4 +1,5 @@
-﻿namespace Armony.Scripts.Utilities.NetworkPool
+﻿#if NETCODE_ENABLED
+namespace Armony.Scripts.Utilities.NetworkPool
 {
     public interface INetworkPoolUser
     {
@@ -7,3 +8,4 @@
         void ClearFromPool(int index);
     }
 }
+#endif

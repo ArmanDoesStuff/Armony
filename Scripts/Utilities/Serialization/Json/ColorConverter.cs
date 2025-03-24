@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿#if SERIALIZATION_ENABLED
+using Newtonsoft.Json;
 using UnityEngine;
 using System;
 
@@ -27,3 +28,4 @@ namespace Armony.Utilities.Serialization.Converters
         }
     }
 }
+#endif

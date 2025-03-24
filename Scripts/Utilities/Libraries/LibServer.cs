@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if NETCODE_ENABLED
+using System.Collections.Generic;
 using Unity.Netcode;
 
 namespace Armony.Utilities.Libraries
@@ -44,3 +45,4 @@ namespace Armony.Utilities.Libraries
         }
     }
 }
+#endif
