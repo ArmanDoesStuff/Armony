@@ -1,4 +1,4 @@
-﻿#if NETCODE_ENABLED
+﻿#if ARMONY_NETCODE
 using System.Collections.Generic;
 using Unity.Netcode;
 

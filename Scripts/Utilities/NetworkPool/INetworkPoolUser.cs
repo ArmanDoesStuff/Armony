@@ -1,4 +1,4 @@
-﻿#if NETCODE_ENABLED
+﻿#if ARMONY_NETCODE
 namespace Armony.Scripts.Utilities.NetworkPool
 {
     public interface INetworkPoolUser

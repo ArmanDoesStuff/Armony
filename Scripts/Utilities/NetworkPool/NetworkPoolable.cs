@@ -1,4 +1,4 @@
-﻿#if NETCODE_ENABLED
+﻿#if ARMONY_NETCODE
 using UnityEngine;
 
 namespace Armony.Scripts.Utilities.NetworkPool

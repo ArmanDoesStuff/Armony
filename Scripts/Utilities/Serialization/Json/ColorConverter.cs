@@ -1,4 +1,4 @@
-﻿#if SERIALIZATION_ENABLED
+﻿#if ARMONY_SERIALIZATION
 using Newtonsoft.Json;
 using UnityEngine;
 using System;
