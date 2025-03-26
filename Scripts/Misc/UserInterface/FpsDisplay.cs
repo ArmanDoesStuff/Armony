@@ -2,38 +2,39 @@
 
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Armony.Misc.UserInterface
 {
     [RequireComponent(typeof(TMP_Text))]
     public class FpsDisplay : MonoBehaviour
     {
-        private TMP_Text m_fpsText;
+        private TMP_Text mFPSText;
 
-        private int m_frameCounter = 0;
-        private float m_timeCounter = 0.0f;
-        private float m_lastFramerate = 0.0f;
-        public float RefreshTime = 0.5f;
+        private int mFrameCounter;
+        private float mTimeCounter;
+        private float mLastFramerate;
+        public float refreshTime = 0.5f;
 
         private void Start()
         {
-            m_fpsText = GetComponent<TMP_Text>();
+            mFPSText = GetComponent<TMP_Text>();
         }
 
         private void Update()
         {
-            if (m_timeCounter < RefreshTime)
+            if (mTimeCounter < refreshTime)
             {
-                m_timeCounter += Time.deltaTime;
-                m_frameCounter++;
+                mTimeCounter += Time.deltaTime;
+                mFrameCounter++;
             }
             else
             {
-                m_lastFramerate = m_frameCounter / m_timeCounter;
-                m_fpsText.text = "FPS: " + m_lastFramerate.ToString("000");
+                mLastFramerate = mFrameCounter / mTimeCounter;
+                mFPSText.text = "FPS: " + mLastFramerate.ToString("000");
 
-                m_frameCounter = 0;
-                m_timeCounter = 0.0f;
+                mFrameCounter = 0;
+                mTimeCounter = 0.0f;
             }
         }
     }
