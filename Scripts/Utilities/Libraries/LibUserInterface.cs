@@ -100,11 +100,16 @@ namespace Armony.Utilities.Libraries
             return fileBtns[0];
         }
 
-        public static async Task Fade(this CanvasGroup cGroup, bool endAlpha, bool force = false, float timeTaken = 0.3f, float delay = 0f)
+        public static async Task Fade(this CanvasGroup cGroup, bool setActive, float timeTaken = 0.3f, float delay = 0f)
         {
-            if (force)
-                cGroup.alpha = (!endAlpha).ToInt();
-            await Fade(cGroup, endAlpha.ToInt(), timeTaken, delay, endAlpha);
+            if (Math.Abs(cGroup.alpha - setActive.ToInt()) < 0.1f)
+            {
+                cGroup.alpha = setActive.ToInt();
+                cGroup.interactable = cGroup.blocksRaycasts = setActive;
+                cGroup.gameObject.SetActive(setActive);
+                return;
+            }
+            await Fade(cGroup, setActive.ToInt(), timeTaken, delay, setActive);
         }
 
         public static async Task Fade(this CanvasGroup cGroup, float endAlpha, float timeTaken = 0.3f, float delay = 0f, bool activeAfter = true)
@@ -126,8 +131,7 @@ namespace Armony.Utilities.Libraries
             }
 
             cGroup.alpha = endAlpha;
-
-            cGroup.interactable = activeAfter;
+            cGroup.interactable = cGroup.blocksRaycasts = activeAfter;
             cGroup.gameObject.SetActive(activeAfter);
         }
 
