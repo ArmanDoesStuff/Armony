@@ -102,10 +102,10 @@ namespace Armony.Utilities.Libraries
 
         public static async Task Fade(this CanvasGroup cGroup, bool setActive, float timeTaken = 0.3f, float delay = 0f)
         {
+            cGroup.interactable = cGroup.blocksRaycasts = setActive;
             if (Math.Abs(cGroup.alpha - setActive.ToInt()) < 0.1f)
             {
                 cGroup.alpha = setActive.ToInt();
-                cGroup.interactable = cGroup.blocksRaycasts = setActive;
                 cGroup.gameObject.SetActive(setActive);
                 return;
             }
