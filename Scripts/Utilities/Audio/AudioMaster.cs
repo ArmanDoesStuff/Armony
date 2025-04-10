@@ -9,6 +9,7 @@ using Armony.Utilities.Singleton;
 using UnityEngine;
 using UnityEngine.Audio;
 
+// ReSharper disable MemberCanBePrivate.Global
 namespace Armony.Utilities.Audio
 {
     public enum SoundType
@@ -20,21 +21,21 @@ namespace Armony.Utilities.Audio
         Music
     };
 
+    [DisallowMultipleComponent]
     public class AudioMaster : MonoBehaviour
     {
         private static AudioMaster Instance => SingletonManager.GetInstance<AudioMaster>();
 
+        [SerializeField]
+        private AudioMixer mainMixer;
+
+        [SerializeField]
+        private AnimationCurve falloffCurve = AnimationCurve.Linear(0, 1, 1, 0);
+        internal static AnimationCurve FalloffCurve => Instance.falloffCurve;
+
         private static readonly ConcurrentStack<AudioSource> Sources = new();
 
-        [SerializeField]
-        private AnimationCurve m_falloffCurve;
-        internal static AnimationCurve FalloffCurve => Instance.m_falloffCurve;
-        
-        [SerializeField]
-        private AudioMixer m_mainMixer;
-        private AudioMixer MainMixer => m_mainMixer;
-
-        internal static AudioMixerGroup[] MixerGroups => Instance.MainMixer.FindMatchingGroups(string.Empty);
+        internal static AudioMixerGroup[] MixerGroups => Instance.mainMixer.FindMatchingGroups(string.Empty);
 
         public static float[] Volumes
         {
@@ -50,26 +51,26 @@ namespace Armony.Utilities.Audio
             }
         }
 
-        public static bool IsPlaying => Sources.Any(a => a.isPlaying);
+        public static bool IsPlaying => Sources.Any(_a => _a.isPlaying);
 
-        private static float GetVolume(SoundType soundType)
+        private static float GetVolume(SoundType _soundType)
         {
-            Instance.MainMixer.GetFloat($"volume{soundType.ToString()}", out float volume);
+            Instance.mainMixer.GetFloat($"volume{_soundType.ToString()}", out float volume);
             volume = (volume + 80f) / 80f;
             return volume;
         }
 
-        private static void SetVolume(SoundType soundType, float volume)
+        private static void SetVolume(SoundType _soundType, float _volume)
         {
-            volume = (Mathf.Clamp01(volume) * 80f) - 80f;
-            Instance.MainMixer.SetFloat($"volume{soundType.ToString()}", volume);
+            _volume = (Mathf.Clamp01(_volume) * 80f) - 80f;
+            Instance.mainMixer.SetFloat($"volume{_soundType.ToString()}", _volume);
         }
 
-        public static void SetVolumes(float[] volumes)
+        public static void SetVolumes(float[] _volumes)
         {
-            for (int i = 0; i < volumes.Length; i++)
+            for (int i = 0; i < _volumes.Length; i++)
             {
-                SetVolume((SoundType)i, volumes[i]);
+                SetVolume((SoundType)i, _volumes[i]);
             }
         }
 
@@ -93,71 +94,73 @@ namespace Armony.Utilities.Audio
             return source;
         }
 
-        private static async void ActivateSource(AudioSource source)
+        private static async void ActivateSource(AudioSource _source)
         {
-            while (source.isPlaying)
+            while (_source.isPlaying)
             {
                 await Task.Yield();
-                if(source == null)
+                if (_source == null)
                     return;
             }
 
-            Sources.Push(source);
+            Sources.Push(_source);
         }
     }
 
     public static class AudioClipExtensions
     {
-        public static float DefaultSpatialBlend = 1f;
+        // ReSharper disable once FieldCanBeMadeReadOnly.Global ConvertToConstant.Global
+        //TODO: Add setter that calls SetFalloff on all sources
+        public static float defaultSpatialBlend = 1f;
 
         public static AudioSource Play(
-            this AudioClip clip,
-            SoundType soundType = SoundType.General,
-            float pitch = 1,
-            float volume = 1,
-            bool applySoundType = true,
-            Vector3? position = null
+            this AudioClip _clip,
+            SoundType _soundType = SoundType.General,
+            float _pitch = 1,
+            float _volume = 1,
+            bool _applySoundType = true,
+            Vector3? _position = null
         )
         {
             AudioSource audS = AudioMaster.GetAudioSourceFromPool();
 #if UNITY_EDITOR
-            audS.gameObject.name = clip.name;
+            audS.gameObject.name = _clip.name;
 #endif
-            if (applySoundType)
-                audS.outputAudioMixerGroup = AudioMaster.MixerGroups[(int)soundType];
-            audS.clip = clip;
-            audS.pitch = pitch;
-            audS.volume = volume;
-            if (position.HasValue)
-                audS.gameObject.transform.position = position.Value;
-            audS.spatialBlend = position.HasValue ? DefaultSpatialBlend : 0f;
+            if (_applySoundType)
+                audS.outputAudioMixerGroup = AudioMaster.MixerGroups[(int)_soundType];
+            audS.clip = _clip;
+            audS.pitch = _pitch;
+            audS.volume = _volume;
+            if (_position.HasValue)
+                audS.gameObject.transform.position = _position.Value;
+            audS.spatialBlend = _position.HasValue ? defaultSpatialBlend : 0f;
             audS.Play();
             return audS;
         }
 
         public static AudioSource PlayRandom(
-            this AudioClip[] clips,
-            SoundType soundType = SoundType.General,
-            float pitch = 1, float volume = 1,
-            bool applySoundType = true,
-            Vector3? position = null
-        ) => Play(clips[UnityEngine.Random.Range(0, clips.Length)], soundType, pitch, volume, applySoundType, position);
+            this AudioClip[] _clips,
+            SoundType _soundType = SoundType.General,
+            float _pitch = 1, float _volume = 1,
+            bool _applySoundType = true,
+            Vector3? _position = null
+        ) => Play(_clips[UnityEngine.Random.Range(0, _clips.Length)], _soundType, _pitch, _volume, _applySoundType, _position);
 
         public static AudioSource PlayRandom(
-            this List<AudioClip> clips,
-            SoundType soundType = SoundType.General,
-            float pitch = 1,
-            float volume = 1,
-            bool applySoundType = true,
-            Vector3? position = null
-        ) => PlayRandom(clips.ToArray(), soundType, pitch, volume, applySoundType, position);
+            this List<AudioClip> _clips,
+            SoundType _soundType = SoundType.General,
+            float _pitch = 1,
+            float _volume = 1,
+            bool _applySoundType = true,
+            Vector3? _position = null
+        ) => PlayRandom(_clips.ToArray(), _soundType, _pitch, _volume, _applySoundType, _position);
 
-        public static void SetFalloff(this AudioSource source, float maxDistance = 30f, float? spatialBlend = null)
+        public static void SetFalloff(this AudioSource _source, float _maxDistance = 30f, float? _spatialBlend = null)
         {
-            source.rolloffMode = AudioRolloffMode.Custom;
-            source.maxDistance = maxDistance;
-            source.spatialBlend = spatialBlend ?? DefaultSpatialBlend;
-            source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, AudioMaster.FalloffCurve);
+            _source.rolloffMode = AudioRolloffMode.Custom;
+            _source.maxDistance = _maxDistance;
+            _source.spatialBlend = _spatialBlend ?? defaultSpatialBlend;
+            _source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, AudioMaster.FalloffCurve);
         }
     }
 }
