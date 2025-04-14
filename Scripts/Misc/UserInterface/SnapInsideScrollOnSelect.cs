@@ -17,12 +17,10 @@ namespace Armony.Misc.UserInterface
             }
 
             RectTransform rect = GetComponent<RectTransform>();
-            GetComponent<ButtonExtended>().SelectedEvent += selected =>
+            GetComponent<ButtonExtended>().selectedEvent += _selected =>
             {
-                if (selected)
-                {
+                if (_selected)
                     rect.MoveContentToReveal();
-                }
             };
         }
     }

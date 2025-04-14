@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Armony.Misc.UserInterface
@@ -11,68 +12,81 @@ namespace Armony.Misc.UserInterface
     public class ButtonExtended : Button //TODO: Make abstract and move interaction sounds child - https://armandoesstuff.atlassian.net/browse/ARM-3
     {
 
-        [SerializeField]
-        private UnityEvent m_submittedEvent;
-        public UnityEvent SubmittedEvent => m_submittedEvent;
-
-        public delegate void ButtonEvent(bool activate);
-        
-        public event ButtonEvent SelectedEvent;
-        public event ButtonEvent HighlightedEvent;
+        public UnityEvent submittedEvent;
+        public Action<bool> selectedEvent;
+        public Action<bool> highlightedEvent;
+        public Action<bool> pressedEvent;
 
         protected bool Selected { get; private set; }
 
-        public override void OnPointerClick(PointerEventData eventData)
+        public override void OnPointerClick(PointerEventData _eventData)
         {
-            base.OnPointerClick(eventData);
+            base.OnPointerClick(_eventData);
             Submitted();
         }
 
-        public override void OnSubmit(BaseEventData eventData)
+        public override void OnSubmit(BaseEventData _eventData)
         {
-            base.OnSubmit(eventData);
+            base.OnSubmit(_eventData);
             Submitted();
         }
 
-        public override void OnSelect(BaseEventData eventData)
+        public override void OnSelect(BaseEventData _eventData)
         {
-            base.OnSelect(eventData);
+            base.OnSelect(_eventData);
             SetSelected(true);
         }
 
-        public override void OnDeselect(BaseEventData eventData)
+        public override void OnDeselect(BaseEventData _eventData)
         {
-            base.OnDeselect(eventData);
+            base.OnDeselect(_eventData);
             SetSelected(false);
         }
 
-        public override void OnPointerEnter(PointerEventData eventData)
+        public override void OnPointerEnter(PointerEventData _eventData)
         {
-            base.OnPointerEnter(eventData);
+            base.OnPointerEnter(_eventData);
             SetHighlighted(true);
         }
 
-        public override void OnPointerExit(PointerEventData eventData)
+        public override void OnPointerExit(PointerEventData _eventData)
         {
-            base.OnPointerExit(eventData);
+            base.OnPointerExit(_eventData);
             SetHighlighted(false);
         }
 
-        protected virtual void SetSelected(bool selected)
+        public override void OnPointerDown(PointerEventData _eventData)
         {
-            Selected = selected;
-            SelectedEvent?.Invoke(selected);
+            base.OnPointerDown(_eventData);
+            SetPressed(true);
         }
 
-        protected virtual void SetHighlighted(bool highlighted)
+        public override void OnPointerUp(PointerEventData _eventData)
+        {
+            base.OnPointerUp(_eventData);
+            SetPressed(false);
+        }
+
+        protected virtual void SetSelected(bool _selected)  
+        {
+            Selected = _selected;
+            selectedEvent?.Invoke(_selected);
+        }
+
+        protected virtual void SetHighlighted(bool _highlighted)
         {
             if(Selected) return;
-            HighlightedEvent?.Invoke(highlighted);
+            highlightedEvent?.Invoke(_highlighted);
         }
         
+        protected virtual void SetPressed(bool _pressed)
+        {
+            if(Selected) return;
+            pressedEvent?.Invoke(_pressed);
+        }
         protected virtual void Submitted()
         {
-            SubmittedEvent?.Invoke();
+            submittedEvent?.Invoke();
         }
     }
 }
