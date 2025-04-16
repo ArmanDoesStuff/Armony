@@ -12,24 +12,24 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibUserInterface
     {
-        public static void SetListener(this Button button, UnityAction action)
+        public static void SetListener(this Button _button, UnityAction _action)
         {
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(action);
+            _button.onClick.RemoveAllListeners();
+            _button.onClick.AddListener(_action);
         }
 
-        public static void Passthrough(this CanvasGroup canvasGroup, bool pass)
+        public static void Passthrough(this CanvasGroup _canvasGroup, bool _pass)
         {
-            canvasGroup.interactable = canvasGroup.blocksRaycasts = !pass;
+            _canvasGroup.interactable = _canvasGroup.blocksRaycasts = !_pass;
         }
 
-        public static bool Contains(this RectTransform self, RectTransform rect)
+        public static bool Contains(this RectTransform _self, RectTransform _rect)
         {
             Vector3[] selfCorners = new Vector3[4];
-            self.GetWorldCorners(selfCorners);
+            _self.GetWorldCorners(selfCorners);
 
             Vector3[] objectCorners = new Vector3[4];
-            rect.GetWorldCorners(objectCorners);
+            _rect.GetWorldCorners(objectCorners);
 
             return selfCorners[0].x <= objectCorners[0].x //bottom left corner
                    && selfCorners[0].y <= objectCorners[0].y
@@ -37,123 +37,129 @@ namespace Armony.Utilities.Libraries
                    && selfCorners[2].y >= objectCorners[2].y;
         }
 
-        public static void AnchorToCorner(this RectTransform t)
+        public static void AnchorToCorner(this RectTransform _t)
         {
-            RectTransform tP = t.parent as RectTransform;
+            RectTransform tP = _t.parent as RectTransform;
 
-            Vector2 newAnchorsMin = new(t.anchorMin.x + t.offsetMin.x / tP.rect.width, t.anchorMin.y + t.offsetMin.y / tP.rect.height);
-            Vector2 newAnchorsMax = new(t.anchorMax.x + t.offsetMax.x / tP.rect.width, t.anchorMax.y + t.offsetMax.y / tP.rect.height);
-            t.anchorMin = newAnchorsMin;
-            t.anchorMax = newAnchorsMax;
+            Vector2 newAnchorsMin = new(_t.anchorMin.x + _t.offsetMin.x / tP.rect.width, _t.anchorMin.y + _t.offsetMin.y / tP.rect.height);
+            Vector2 newAnchorsMax = new(_t.anchorMax.x + _t.offsetMax.x / tP.rect.width, _t.anchorMax.y + _t.offsetMax.y / tP.rect.height);
+            _t.anchorMin = newAnchorsMin;
+            _t.anchorMax = newAnchorsMax;
 
-            t.offsetMin = t.offsetMax = new Vector2(0, 0);
+            _t.offsetMin = _t.offsetMax = new Vector2(0, 0);
         }
 
-        public static void AnchorToCanvas(this RectTransform t)
+        public static void AnchorToCanvas(this RectTransform _t)
         {
-            t.anchorMin = new Vector2(0, 0);
-            t.anchorMax = new Vector2(1, 1);
+            _t.anchorMin = new Vector2(0, 0);
+            _t.anchorMax = new Vector2(1, 1);
         }
 
-        public static void CornerToAnchor(this RectTransform t)
+        public static void CornerToAnchor(this RectTransform _t)
         {
-            t.offsetMin = t.offsetMax = new Vector2(0, 0);
+            _t.offsetMin = _t.offsetMax = new Vector2(0, 0);
         }
 
-        public static void Maximise(this RectTransform t)
+        public static void Maximise(this RectTransform _t)
         {
-            t.AnchorToCanvas();
-            t.AnchorToCorner();
+            _t.AnchorToCanvas();
+            _t.AnchorToCorner();
         }
 
         /// <summary>
         /// Moves the content of a ScrollRect to ensure the selected item is seen.
         /// Used OnSelect for buttons in a ScrollRect
         /// </summary>
-        /// <param name="snap"></param>
-        public static void MoveContentToReveal(this RectTransform snap)
+        /// <param name="_snap"></param>
+        public static void MoveContentToReveal(this RectTransform _snap)
         {
-            if (snap.TryGetComponentInParent(out ScrollRect scrollRect))
-                MoveContentToReveal(snap, scrollRect);
+            if (_snap.TryGetComponentInParent(out ScrollRect scrollRect))
+                MoveContentToReveal(_snap, scrollRect);
         }
 
-        private static void MoveContentToReveal(this RectTransform snap, ScrollRect scroll)
+        private static void MoveContentToReveal(this RectTransform _snap, ScrollRect _scroll)
         {
-            RectTransform scrollRect = (RectTransform)scroll.transform;
-            RectTransform contentRect = scroll.content;
+            RectTransform scrollRect = (RectTransform)_scroll.transform;
+            RectTransform contentRect = _scroll.content;
 
-            if (!scrollRect.Contains(snap))
-                contentRect.anchoredPosition = (Vector2)scrollRect.InverseTransformPoint(contentRect.position) - new Vector2(0, scrollRect.InverseTransformPoint(snap.position).y);
+            if (!scrollRect.Contains(_snap))
+                contentRect.anchoredPosition = (Vector2)scrollRect.InverseTransformPoint(contentRect.position) - new Vector2(0, scrollRect.InverseTransformPoint(_snap.position).y);
         }
 
-        public static Selectable LinkNavigationVertical(Selectable[] fileBtns)
+        public static Selectable LinkNavigationVertical(Selectable[] _fileBtns)
         {
-            int len = fileBtns.Length;
+            int len = _fileBtns.Length;
             for (int i = 0; i < len; i++)
             {
-                Navigation n = fileBtns[i].navigation;
-                n.selectOnUp = fileBtns[(i - 1).LoopInt(len)];
-                n.selectOnDown = fileBtns[(i + 1).LoopInt(len)];
-                fileBtns[i].navigation = n;
+                Navigation n = _fileBtns[i].navigation;
+                n.selectOnUp = _fileBtns[(i - 1).LoopInt(len)];
+                n.selectOnDown = _fileBtns[(i + 1).LoopInt(len)];
+                _fileBtns[i].navigation = n;
             }
 
-            return fileBtns[0];
+            return _fileBtns[0];
         }
 
-        public static async Task Fade(this CanvasGroup cGroup, bool setActive, float timeTaken = 0.3f, float delay = 0f)
+        public static void FadeInstant(this CanvasGroup _cGroup, bool _setActive)
         {
-            cGroup.interactable = cGroup.blocksRaycasts = setActive;
-            if (Math.Abs(cGroup.alpha - setActive.ToInt()) < 0.1f)
+            _cGroup.interactable = _cGroup.blocksRaycasts = _setActive;
+            _cGroup.alpha = _setActive.ToInt();
+            _cGroup.gameObject.SetActive(_setActive);
+        }
+        public static async Task Fade(this CanvasGroup _cGroup, bool _setActive, float _timeTaken = 0.3f, float _delay = 0f)
+        {
+            _cGroup.interactable = _cGroup.blocksRaycasts = _setActive;
+            if (Math.Abs(_cGroup.alpha - _setActive.ToInt()) < 0.1f)
             {
-                cGroup.alpha = setActive.ToInt();
-                cGroup.gameObject.SetActive(setActive);
+                _cGroup.alpha = _setActive.ToInt();
+                _cGroup.gameObject.SetActive(_setActive);
                 return;
             }
-            await Fade(cGroup, setActive.ToInt(), timeTaken, delay, setActive);
+            await Fade(_cGroup, _setActive.ToInt(), _timeTaken, _delay, _setActive);
         }
 
-        public static async Task Fade(this CanvasGroup cGroup, float endAlpha, float timeTaken = 0.3f, float delay = 0f, bool activeAfter = true)
+        public static async Task Fade(this CanvasGroup _cGroup, float _endAlpha, float _timeTaken = 0.3f, float _delay = 0f, bool _activeAfter = true)
         {
-            await Task.Delay((int)(delay * 1000));
-            if (!cGroup.gameObject.activeSelf)
-                cGroup.gameObject.SetActive(true);
-            if (Math.Abs(cGroup.alpha - endAlpha) < 0.01f && cGroup.gameObject.activeSelf == activeAfter) //Check if nothing will be changed
+            await Task.Delay((int)(_delay * 1000));
+            if (!_cGroup.gameObject.activeSelf)
+                _cGroup.gameObject.SetActive(true);
+            if (Math.Abs(_cGroup.alpha - _endAlpha) < 0.01f && _cGroup.gameObject.activeSelf == _activeAfter) //Check if nothing will be changed
                 return;
 
-            float startAlpha = cGroup.alpha;
+            float startAlpha = _cGroup.alpha;
             float timer = 0;
-            cGroup.interactable = false;
+            _cGroup.interactable = false;
             while (timer <= 1)
             {
-                cGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, timer);
-                timer += Time.deltaTime / timeTaken;
+                _cGroup.alpha = Mathf.Lerp(startAlpha, _endAlpha, timer);
+                timer += Time.deltaTime / _timeTaken;
                 await Task.Yield();
             }
 
-            cGroup.alpha = endAlpha;
-            cGroup.interactable = cGroup.blocksRaycasts = activeAfter;
-            cGroup.gameObject.SetActive(activeAfter);
+            _cGroup.alpha = _endAlpha;
+            _cGroup.interactable = _cGroup.blocksRaycasts = _activeAfter;
+            _cGroup.gameObject.SetActive(_activeAfter);
         }
 
         /// <summary>
         /// Adds a space before capital letters for use with Pascal case names
         /// </summary>
-        /// <param name="text"></param>
+        /// <param name="_text"></param>
         /// <returns></returns>
-        public static string PascalSpace(string text)
+        public static string PascalSpace(string _text)
         {
-            if (string.IsNullOrEmpty(text))
-                return text;
+            if (string.IsNullOrEmpty(_text))
+                return _text;
 
-            System.Text.StringBuilder stringBuilder = new(text.Length * 2);
-            stringBuilder.Append(text[0]);
+            System.Text.StringBuilder stringBuilder = new(_text.Length * 2);
+            stringBuilder.Append(_text[0]);
 
-            for (int i = 1; i < text.Length; i++)
+            for (int i = 1; i < _text.Length; i++)
             {
-                if (char.IsUpper(text[i]) &&
-                    (char.IsLower(text[i - 1]) || char.IsDigit(text[i - 1]) || char.IsPunctuation(text[i - 1]) || !char.IsUpper(text[i - 1])))
+                if (char.IsUpper(_text[i]) &&
+                    (char.IsLower(_text[i - 1]) || char.IsDigit(_text[i - 1]) || char.IsPunctuation(_text[i - 1]) || !char.IsUpper(_text[i - 1])))
                     stringBuilder.Append(' ');
-                stringBuilder.Append(text[i]);
+                stringBuilder.Append(_text[i]);
             }
 
             return stringBuilder.ToString();
