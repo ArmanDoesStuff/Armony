@@ -16,7 +16,7 @@ namespace Armony.Utilities.Singleton
                 return (T)singleton;
             }
 
-            T newSingleton = Object.FindAnyObjectByType<T>();
+            T newSingleton = Object.FindAnyObjectByType<T>(FindObjectsInactive.Include);
             if (newSingleton == null)
             {
                 GameObject singletonObject = new(typeof(T).Name)
