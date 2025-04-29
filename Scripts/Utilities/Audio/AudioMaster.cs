@@ -3,11 +3,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Armony.Utilities.Singleton;
 using UnityEngine;
 using UnityEngine.Audio;
+using Debug = UnityEngine.Debug;
 
 // ReSharper disable MemberCanBePrivate.Global
 namespace Armony.Utilities.Audio
@@ -33,7 +35,7 @@ namespace Armony.Utilities.Audio
         private AnimationCurve falloffCurve = AnimationCurve.Linear(0, 1, 1, 0);
         internal static AnimationCurve FalloffCurve => Instance.falloffCurve;
 
-        private static readonly ConcurrentStack<AudioSource> Sources = new();
+        internal static  ConcurrentStack<AudioSource> Sources { get; } = new();
 
         internal static AudioMixerGroup[] MixerGroups => Instance.mainMixer.FindMatchingGroups(string.Empty);
 
@@ -96,6 +98,7 @@ namespace Armony.Utilities.Audio
 
         private static async void ActivateSource(AudioSource _source)
         {
+            await Task.Yield();
             while (_source.isPlaying)
             {
                 await Task.Yield();
@@ -135,6 +138,7 @@ namespace Armony.Utilities.Audio
                 audS.gameObject.transform.position = _position.Value;
             audS.spatialBlend = _position.HasValue ? defaultSpatialBlend : 0f;
             audS.Play();
+            Debug.Log(AudioMaster.Sources.Count);
             return audS;
         }
 
