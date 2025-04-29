@@ -35,7 +35,7 @@ namespace Armony.Utilities.Audio
         private AnimationCurve falloffCurve = AnimationCurve.Linear(0, 1, 1, 0);
         internal static AnimationCurve FalloffCurve => Instance.falloffCurve;
 
-        internal static  ConcurrentStack<AudioSource> Sources { get; } = new();
+        private static readonly ConcurrentStack<AudioSource> sources = new();
 
         internal static AudioMixerGroup[] MixerGroups => Instance.mainMixer.FindMatchingGroups(string.Empty);
 
@@ -53,7 +53,7 @@ namespace Armony.Utilities.Audio
             }
         }
 
-        public static bool IsPlaying => Sources.Any(_a => _a.isPlaying);
+        public static bool IsPlaying => sources.Any(_a => _a.isPlaying);
 
         private static float GetVolume(SoundType _soundType)
         {
@@ -78,7 +78,7 @@ namespace Armony.Utilities.Audio
 
         internal static AudioSource GetAudioSourceFromPool()
         {
-            Sources.TryPop(out AudioSource source);
+            sources.TryPop(out AudioSource source);
             if (source == null)
             {
                 GameObject sourceHolder = new()
@@ -106,7 +106,7 @@ namespace Armony.Utilities.Audio
                     return;
             }
 
-            Sources.Push(_source);
+            sources.Push(_source);
         }
     }
 
@@ -138,7 +138,6 @@ namespace Armony.Utilities.Audio
                 audS.gameObject.transform.position = _position.Value;
             audS.spatialBlend = _position.HasValue ? defaultSpatialBlend : 0f;
             audS.Play();
-            Debug.Log(AudioMaster.Sources.Count);
             return audS;
         }
 
