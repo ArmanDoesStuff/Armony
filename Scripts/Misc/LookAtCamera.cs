@@ -5,19 +5,12 @@ namespace Armony.Misc
 {
     public class LookAtCamera : MonoBehaviour
     {
-        private Transform PlayerCamera { get; set; }
+        private Transform mainCameraTransform;
+        private Transform MainCameraTransform => mainCameraTransform ??= Camera.main.transform;
 
-        private void Awake()
+        private void FixedUpdate()
         {
-            if (Camera.main != null) PlayerCamera = Camera.main.transform;
-        }
-
-        private void Update()
-        {
-            if (PlayerCamera == null) return;
-            Vector3 targetPosition = PlayerCamera.transform.position;
-            targetPosition.y = transform.position.y;
-            transform.rotation = Quaternion.LookRotation(transform.position - targetPosition);
+            transform.LookAt(MainCameraTransform);
         }
     }
 }

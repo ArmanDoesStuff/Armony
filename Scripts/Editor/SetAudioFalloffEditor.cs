@@ -12,14 +12,14 @@ namespace Armony.Editor
 
         private void OnEnable()
         {
-            ForceSpatialBlendProp = serializedObject.FindProperty("m_forceSpatialBlend");
-            SpatialBlendProp = serializedObject.FindProperty("m_spatialBlend");
+            ForceSpatialBlendProp = serializedObject.FindProperty("forceSpatialBlend");
+            SpatialBlendProp = serializedObject.FindProperty("spatialBlend");
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            DrawPropertiesExcluding(serializedObject, "m_forceSpatialBlend", "m_spatialBlend");
+            DrawPropertiesExcluding(serializedObject, "forceSpatialBlend", "spatialBlend");
             EditorGUILayout.PropertyField(ForceSpatialBlendProp);
             if (ForceSpatialBlendProp.boolValue)
             {

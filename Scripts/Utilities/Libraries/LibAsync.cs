@@ -6,11 +6,11 @@ namespace Armony.Utilities.Libraries
 {
     public static class LibAsync
     {
-        public static async void RunAsync(this Task task)
+        public static async void RunAsync(this Task _task)
         {
             try
             {
-                await task;
+                await _task;
             }
             catch (Exception exception)
             {
@@ -18,12 +18,12 @@ namespace Armony.Utilities.Libraries
             }
         }
         
-        public static Task Task(this AsyncOperation asyncOperation)
+        public static Task Task(this AsyncOperation _asyncOperation)
         {
             TaskCompletionSource<object> taskCompletionSource = new();
-            asyncOperation.completed += (operation) =>
+            _asyncOperation.completed += (_operation) =>
             {
-                if (operation.isDone)
+                if (_operation.isDone)
                 {
                     taskCompletionSource.TrySetResult(null);
                 }

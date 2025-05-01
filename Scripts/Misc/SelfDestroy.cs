@@ -1,5 +1,6 @@
 ﻿//Created by Arman Awan - ArmanDoesStuff 2018
 
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Armony.Misc
@@ -7,15 +8,12 @@ namespace Armony.Misc
     public class SelfDestroy : MonoBehaviour
     {
         [SerializeField]
-        private float m_timeToDestroy = 5f;
-        private void Start()
+        private int timeToDestroy = 5000;
+        private async void Start()
         {
-            Invoke("DestroySelf", m_timeToDestroy);
-        }
-
-        private void DestroySelf()
-        {
+            await Task.Delay(timeToDestroy);
             Destroy(gameObject);
+
         }
     }
 }
