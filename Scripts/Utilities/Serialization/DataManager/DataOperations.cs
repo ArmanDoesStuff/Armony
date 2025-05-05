@@ -1,158 +1,95 @@
+//Requires com.unity.nuget.newtonsoft-json package
+
 #if ARMONY_SERIALIZATION
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Armony.Utilities;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ArmanDoesStuff.Core
 {
     public static class DataOperations
     {
-        private static string GetFilename(string fileName) => $"{Application.persistentDataPath}/{fileName}";
-        private static string GetPrefsFilename(string fileName) => $"{GetFilename(fileName)}Prefs";
+        private static string GetFilename(string _fileName) => $"{Application.persistentDataPath}/{_fileName}.gData";
+        private static string GetPrefsFilename(string _fileName) => $"{GetFilename(_fileName)}Prefs";
 
-        public static bool LoadActual<T>(string fileName, out T data)
+        public static void SaveData<T>(T _saveData, string _fileName = "Main")
         {
-            fileName = GetFilename(fileName);
-            if (File.Exists(fileName))
+            _fileName = GetFilename(_fileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(_fileName)!);
+            string jsonData = JsonConvert.SerializeObject(_saveData);
+            byte[] encrypted = EncrypterAes.EncryptStringToBytesAes(jsonData);
+            File.WriteAllBytes(_fileName, encrypted);
+        }
+
+
+        public static bool LoadData<T>(out T _data, string _fileName = "Main")
+        {
+            _fileName = GetFilename(_fileName);
+            if (File.Exists(_fileName))
             {
-                byte[] encrypted = File.ReadAllBytes(fileName);
+                byte[] encrypted = File.ReadAllBytes(_fileName);
                 string jsonData = EncrypterAes.DecryptStringFromBytesAes(encrypted);
-                data = JsonConvert.DeserializeObject<T>(jsonData);
+                _data = JsonConvert.DeserializeObject<T>(jsonData);
                 return true;
             }
+
             if (typeof(T).IsValueType || Nullable.GetUnderlyingType(typeof(T)) != null)
             {
-                data = default;
+                _data = default;
             }
             else
             {
-                data = Activator.CreateInstance<T>();
+                _data = Activator.CreateInstance<T>();
             }
-            return false;
-        }
 
-        public static void SaveActual<T>(T saveData, string fileName)
-        {
-            fileName = GetFilename(fileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(fileName));
-            string jsonData = JsonConvert.SerializeObject(saveData);
-            byte[] encrypted = EncrypterAes.EncryptStringToBytesAes(jsonData);
-            File.WriteAllBytes(fileName, encrypted);
+            return false;
         }
 
         //My own version of player prefs - Includes things like default values - Requires .Net 4
         //Uses a Dictionary of objects to store most kinds of data
         //Some things may nor work on Android - More testing needed (Prefs does not seems to work)
-        public static T GetPref<T>(string key, T defaultVal, string fileName)
+        public static T GetPref<T>(string _key, T _defaultVal, string _fileName)
         {
-            Dictionary<string, object> dict = GetPrefDict(fileName);
-
-            if (dict.ContainsKey(key))
-            {
-                string temp = dict[key].ToString();
-                return JsonConvert.DeserializeObject<T>(temp);
-            }
-            return defaultVal;
+            if (!GetPrefDict(_fileName).TryGetValue(_key, out object value)) return _defaultVal;
+            string temp = value.ToString();
+            return JsonConvert.DeserializeObject<T>(temp);
         }
 
-        public static void SetPref<T>(string key, T value, string fileName)
+        public static void SetPref<T>(string _key, T _value, string _fileName)
         {
-            Dictionary<string, object> dict = GetPrefDict(fileName);
-            dict[key] = JsonConvert.SerializeObject(value);
-            SaveActual(dict, GetPrefsFilename(fileName));
+            Dictionary<string, object> dict = GetPrefDict(_fileName);
+            dict[_key] = JsonConvert.SerializeObject(_value);
+            SaveData(dict, GetPrefsFilename(_fileName));
         }
 
-        //May now be able to use arrays in the regular Get/Set pref method - haven't tested since changing it
-        public static T[] GetPrefArray<T>(string key, T defaultVal, int arraySize, string fileName)
+        private static Dictionary<string, object> GetPrefDict(string _fileName)
         {
-            Dictionary<string, object> dict = GetPrefDict(fileName);
-
-            T[] tArray = new T[arraySize];
-            for (int i = 0; i < arraySize; i++)
-            {
-                string tempKey = key + i.ToString();
-                if (dict.ContainsKey(tempKey))
-                    tArray[i] = (T)dict[tempKey];
-                else
-                    tArray[i] = defaultVal;
-            }
-            return tArray;
-        }
-
-        public static void SetPrefArray<T>(string key, T[] values, string fileName)
-        {
-            Dictionary<string, object> dict = GetPrefDict(fileName);
-            for (int i = 0; i < values.Length; i++)
-            {
-                dict[key + i.ToString()] = values[i];
-            }
-            SaveActual(dict, GetPrefsFilename(fileName));
-        }
-
-        private static Dictionary<string, object> GetPrefDict(string fileName)
-        {
-            LoadActual(GetPrefsFilename(fileName), out Dictionary<string, object> dict);
+            LoadData(out Dictionary<string, object> dict, GetPrefsFilename(_fileName));
             return dict ?? new Dictionary<string, object>();
         }
 
         public static void DeleteAllFiles()
         {
-            DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
+            DirectoryInfo info = new(Application.persistentDataPath);
             foreach (FileInfo file in info.GetFiles())
             {
                 file.Delete();
             }
+
             foreach (DirectoryInfo dir in info.GetDirectories())
             {
                 dir.Delete(true);
             }
-            ExitGame();
         }
 
-        public static void DeleteFile(string fileName, bool quit, bool prefs = false)
+        public static void DeleteFile(string _fileName, bool _prefs = false)
         {
-            if (prefs)
-                fileName = GetPrefsFilename(fileName);
-            File.Delete(Application.persistentDataPath + fileName);
-            if (quit)
-                ExitGame();
-        }
-
-        public static string GenerateFilename(string fileMeta, bool unique = true)
-        {
-            if (!unique) return $"/{fileMeta}.gdat";
-            string d = DateTime.Now.ToString();
-            d = d.Replace('/', '%');
-            d = d.Replace(':', '$');
-            fileMeta = $"{fileMeta}-{d}";
-            return $"/{fileMeta}.gdat";
-        }
-
-        public static string FilenameToDisplay(string fileName, char replacemaentChar)
-        {
-            fileName = PullMetaFromFilename(fileName);
-            fileName = fileName.Substring(1);
-            fileName = fileName.Replace('-', replacemaentChar);
-            return fileName;
-        }
-
-        private static string PullMetaFromFilename(string fileName)
-        {
-            fileName = fileName.Substring(0, fileName.LastIndexOf('.'));
-            fileName = fileName.Replace('%', '/');
-            fileName = fileName.Replace('$', ':');
-            return fileName;
-        }
-        
-        public static void ExitGame()
-        {
-#if UNITY_EDITOR
-            EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+            if (_prefs)
+                _fileName = GetPrefsFilename(_fileName);
+            File.Delete(Application.persistentDataPath + _fileName);
         }
     }
 }

@@ -7,24 +7,23 @@ namespace Armony.Utilities.Serialization.Converters
 {
     public class ColorConverter : JsonConverter
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter _writer, object _value, JsonSerializer _serializer)
         {
-            if (value == null) return;
-            Color color = (Color)value;
-            writer.WriteValue($"#{ColorUtility.ToHtmlStringRGBA(color)}");
+            if (_value == null) return;
+            Color color = (Color)_value;
+            _writer.WriteValue($"#{ColorUtility.ToHtmlStringRGBA(color)}");
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader _reader, Type _objectType, object _existingValue, JsonSerializer _serializer)
         {
-            string colorString = (string)reader.Value;
-            Color color;
-            ColorUtility.TryParseHtmlString(colorString, out color);
+            string colorString = (string)_reader.Value;
+            ColorUtility.TryParseHtmlString(colorString, out Color color);
             return color;
         }
 
-        public override bool CanConvert(Type objectType)
+        public override bool CanConvert(Type _objectType)
         {
-            return objectType == typeof(Color);
+            return _objectType == typeof(Color);
         }
     }
 }
