@@ -71,7 +71,7 @@ namespace ArmanDoesStuff.Core
             return dict ?? new Dictionary<string, object>();
         }
 
-        public static void DeleteAllFiles()
+        public static void ClearData()
         {
             DirectoryInfo info = new(Application.persistentDataPath);
             foreach (FileInfo file in info.GetFiles())
