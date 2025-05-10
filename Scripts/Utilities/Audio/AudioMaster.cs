@@ -3,13 +3,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Armony.Utilities.Singleton;
 using UnityEngine;
 using UnityEngine.Audio;
-using Debug = UnityEngine.Debug;
 
 // ReSharper disable MemberCanBePrivate.Global
 namespace Armony.Utilities.Audio

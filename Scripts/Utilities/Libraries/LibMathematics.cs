@@ -1,109 +1,111 @@
 //AWAN SOFTWORKS LTD 2023
 
+using System.Linq;
 using UnityEngine;
 
 namespace Armony.Utilities.Libraries
 {
     public static class LibMathematics
     {
-        public static bool VectorWithinRange(this Vector3 first, Vector3 second, float range = 0.001f)
+        public static bool VectorWithinRange(this Vector3 _first, Vector3 _second, float _range = 0.001f)
         {
-            return Vector3.SqrMagnitude(first - second) < range * range;
+            return Vector3.SqrMagnitude(_first - _second) < _range * _range;
         }
-        
-        public static Vector3 RandomVec3(float spread = 180)
+
+        public static Vector3 RandomVec3(float _spread = 180)
         {
             return new Vector3(
-                Random.Range(-spread, spread),
-                Random.Range(-spread, spread),
-                Random.Range(-spread, spread)
+                Random.Range(-_spread, _spread),
+                Random.Range(-_spread, _spread),
+                Random.Range(-_spread, _spread)
             );
         }
 
-        public static float RandomPerlinFloat(float seed = 0, float timeScale = 1)
+        public static float RandomPerlinFloat(float _seed = 0, float _timeScale = 1)
         {
-            return Mathf.PerlinNoise(seed, seed + (Time.time * timeScale));
+            return Mathf.PerlinNoise(_seed, _seed + (Time.time * _timeScale));
         }
 
-        public static float RandomPerlinFloatBalanced(float seed = 0, float timeScale = 1)
+        public static float RandomPerlinFloatBalanced(float _seed = 0, float _timeScale = 1)
         {
-            return (RandomPerlinFloat(seed, timeScale) - 0.5f) * 2f;
+            return (RandomPerlinFloat(_seed, _timeScale) - 0.5f) * 2f;
         }
 
-        public static Vector3 RandomPerlinVec3(float seed = 0, float timeScale = 1)
+        public static Vector3 RandomPerlinVec3(float _seed = 0, float _timeScale = 1)
         {
             return new Vector3(
-                RandomPerlinFloat(seed, timeScale),
-                RandomPerlinFloat(seed + 1000, timeScale),
-                RandomPerlinFloat(seed + 1000000, timeScale)
+                RandomPerlinFloat(_seed, _timeScale),
+                RandomPerlinFloat(_seed + 1000, _timeScale),
+                RandomPerlinFloat(_seed + 1000000, _timeScale)
             );
         }
 
-        public static Vector3 RandomPerlinVec3Balanced(float seed = 0, float timeScale = 1)
+        public static Vector3 RandomPerlinVec3Balanced(float _seed = 0, float _timeScale = 1)
         {
             return new Vector3(
-                RandomPerlinFloatBalanced(seed, timeScale),
-                RandomPerlinFloatBalanced(seed + 1000, timeScale),
-                RandomPerlinFloatBalanced(seed + 1000000, timeScale)
+                RandomPerlinFloatBalanced(_seed, _timeScale),
+                RandomPerlinFloatBalanced(_seed + 1000, _timeScale),
+                RandomPerlinFloatBalanced(_seed + 1000000, _timeScale)
             );
         }
 
-        public static bool RandomChance(float chance)
+        public static bool RandomChance(float _chance)
         {
-            return Random.Range(0f, 1f) < chance;
+            return Random.Range(0f, 1f) < _chance;
         }
 
-        public static void RotateRandom(this Transform t)
+        public static void RotateRandom(this Transform _t)
         {
-            t.rotation = Random.rotation;
+            _t.rotation = Random.rotation;
         }
 
-        public static void RotateRandom(this Transform t, float spread)
+        public static void RotateRandom(this Transform _t, float _spread)
         {
-            spread /= 2;
-            t.Rotate(RandomVec3(spread));
+            _spread /= 2;
+            _t.Rotate(RandomVec3(_spread));
         }
 
-        public static void RotateRandomPerlin(this Transform t, float seed = 0, float timeScale = 0)
+        public static void RotateRandomPerlin(this Transform _t, float _seed = 0, float _timeScale = 0)
         {
-            t.Rotate(RandomPerlinVec3(seed, timeScale));
+            _t.Rotate(RandomPerlinVec3(_seed, _timeScale));
         }
 
-        public static void AddExplosionForce(this Rigidbody2D rb, float explosionForce, Vector2 explosionPosition)
+        public static void AddExplosionForce(this Rigidbody2D _rb, float _explosionForce, Vector2 _explosionPosition)
         {
-            Vector2 explosionDir = rb.position - explosionPosition;
-            rb.AddForce(explosionForce * explosionDir);
+            Vector2 explosionDir = _rb.position - _explosionPosition;
+            _rb.AddForce(_explosionForce * explosionDir);
         }
 
-        public static float GetImpactForceSum(this Collision2D collision)
+        public static float GetImpactForceSum(this Collision2D _collision)
         {
             //http://answers.unity.com/answers/1906926/view.html
-            ContactPoint2D[] contacts = new ContactPoint2D[collision.contactCount];
-            collision.GetContacts(contacts);
-            float totalImpulse = 0;
-            foreach (ContactPoint2D contact in contacts)
-            {
-                totalImpulse += contact.normalImpulse;
-            }
-            return totalImpulse;
+            ContactPoint2D[] contacts = new ContactPoint2D[_collision.contactCount];
+            _collision.GetContacts(contacts);
+            return contacts.Sum(_contact => _contact.normalImpulse);
         }
 
-        public static float AngleBetweenTwoPoints(Vector3 a, Vector3 b)
+        public static void GroundObject(this Transform _transform, int _layerMask = ~0)
         {
-            return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
+            if (Physics.Raycast(new Ray(_transform.position, Vector3.down), out RaycastHit hit, Mathf.Infinity, _layerMask))
+                _transform.position = hit.point;
         }
 
-        public static float RoundToNearestMultiple(this float numberToRound, float multipleOf)
+        public static float AngleBetweenTwoPoints(Vector3 _a, Vector3 _b)
         {
-            int multiple = Mathf.RoundToInt(numberToRound / multipleOf);
-            return multiple * multipleOf;
+            return Mathf.Atan2(_a.y - _b.y, _a.x - _b.x) * Mathf.Rad2Deg;
         }
-        
-        public static float GetDiagonality(Vector2 vector)
+
+        public static float RoundToNearestMultiple(this float _numberToRound, float _multipleOf)
         {
-            if (vector == Vector2.zero) return 0f;
-            float absX = Mathf.Abs(vector.x);
-            float absY = Mathf.Abs(vector.y);
+            int multiple = Mathf.RoundToInt(_numberToRound / _multipleOf);
+            return multiple * _multipleOf;
+        }
+
+        public static float GetDiagonality(Vector2 _vector)
+        {
+            if (_vector == Vector2.zero) return 0f;
+            float absX = Mathf.Abs(_vector.x);
+            float absY = Mathf.Abs(_vector.y);
             return Mathf.Min(absX, absY) / Mathf.Max(absX, absY);
         }
     }
