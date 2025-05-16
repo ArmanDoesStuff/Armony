@@ -34,20 +34,13 @@ namespace Armony.Utilities.Libraries
             return sList;
         }
 
+        //modulus but works with negatives
         public static int LoopInt(this int i, int count)
         {
-            if (count <= 0)
-            {
-                Debug.LogError("LoopInt Count less than or equal to 0");
-                return 0;
-            }
+            if (count > 0) return (i % count + count) % count;
+            Debug.LogError("LoopInt Count less than or equal to 0");
+            return 0;
 
-            while (i < 0)
-            {
-                i += count;
-            }
-
-            return i % count;
         }
 
         public static bool IsDigitsOnly(this string str)
