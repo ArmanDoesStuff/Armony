@@ -20,14 +20,14 @@ namespace Armony.Utilities.Libraries
 #endif
         }
 
-        public static string[] GetScenes(int startIndex = 0)
+        public static string[] GetScenes(int _startIndex = 0)
         {
             int sCount = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
-            string[] sList = new string[sCount - startIndex];
+            string[] sList = new string[sCount - _startIndex];
             for (int i = 0; i < sList.Length; i++)
             {
                 sList[i] = System.IO.Path.GetFileNameWithoutExtension(
-                    UnityEngine.SceneManagement.SceneUtility.GetScenePathByBuildIndex(i + startIndex)
+                    UnityEngine.SceneManagement.SceneUtility.GetScenePathByBuildIndex(i + _startIndex)
                 );
             }
 
@@ -35,17 +35,17 @@ namespace Armony.Utilities.Libraries
         }
 
         //modulus but works with negatives
-        public static int LoopInt(this int i, int count)
+        public static int LoopInt(this int _i, int _count)
         {
-            if (count > 0) return (i % count + count) % count;
+            if (_count > 0) return (_i % _count + _count) % _count;
             Debug.LogError("LoopInt Count less than or equal to 0");
             return 0;
 
         }
 
-        public static bool IsDigitsOnly(this string str)
+        public static bool IsDigitsOnly(this string _str)
         {
-            foreach (char c in str)
+            foreach (char c in _str)
             {
                 if (c < '0' || c > '9')
                 {
@@ -56,26 +56,26 @@ namespace Armony.Utilities.Libraries
             return true;
         }
 
-        public static void Populate<T>(this T[] arr, T value)
+        public static void Populate<T>(this T[] _arr, T _value)
         {
-            for (int i = 0; i < arr.Length; ++i)
+            for (int i = 0; i < _arr.Length; ++i)
             {
-                arr[i] = value;
+                _arr[i] = _value;
             }
         }
 
-        public static async void Invoke(Action f, float delay = 0f)
+        public static async void Invoke(Action _f, float _delay = 0f)
         {
-            if (delay > 0)
+            if (_delay > 0)
             {
-                await Task.Delay((int)(delay * 1000));
+                await Task.Delay((int)(_delay * 1000));
             }
             else
             {
                 await Task.Yield();
             }
 
-            f();
+            _f();
         }
 
         public static bool RandomBoolean()
@@ -83,36 +83,25 @@ namespace Armony.Utilities.Libraries
             return UnityEngine.Random.Range(0f, 1f) > 0.5 ? true : false;
         }
 
-        public static int WightedChoice(List<float> weights)
+        public static int WightedChoice(List<float> _weights)
         {
-            float totalWeight = UnityEngine.Random.Range(0, weights.Sum());
+            float totalWeight = UnityEngine.Random.Range(0, _weights.Sum());
 
-            for (int i = 0; i < weights.Count; i++)
+            for (int i = 0; i < _weights.Count; i++)
             {
-                totalWeight -= weights[i];
+                totalWeight -= _weights[i];
                 if (totalWeight <= 0)
                     return i;
             }
 
-            return weights.Count - 1;
+            return _weights.Count - 1;
         }
 
-        public static void ClearGameObjects<T>(ref List<T> gameObjectsList)
-            where T : MonoBehaviour
+        public static void DestroyAllChildren(this Transform _parent, bool _immediate = false)
         {
-            foreach (T obj in gameObjectsList)
+            if (!_immediate)
             {
-                Object.Destroy(obj.gameObject);
-            }
-
-            gameObjectsList.Clear();
-        }
-
-        public static void DestroyAllChildren(this Transform parent, bool immediate = false)
-        {
-            if (!immediate)
-            {
-                foreach (Transform child in parent)
+                foreach (Transform child in _parent)
                 {
                     Object.Destroy(child.gameObject);
                 }
@@ -120,21 +109,21 @@ namespace Armony.Utilities.Libraries
                 return;
             }
 
-            foreach (Transform child in parent)
+            foreach (Transform child in _parent)
             {
                 Object.DestroyImmediate(child.gameObject);
             }
         }
 
-        public static bool TryGetComponentInParent<T>(this Component gameObject, out T parentComponent)
+        public static bool TryGetComponentInParent<T>(this Component _gameObject, out T _parentComponent)
         {
-            parentComponent = gameObject.GetComponentInParent<T>();
-            return parentComponent != null;
+            _parentComponent = _gameObject.GetComponentInParent<T>();
+            return _parentComponent != null;
         }
 
-        public static T Random<T>(this IEnumerable<T> enumerable)
+        public static T Random<T>(this IEnumerable<T> _enumerable)
         {
-            T[] array = enumerable.ToArray();
+            T[] array = _enumerable.ToArray();
             return array[UnityEngine.Random.Range(0, array.Length)];
         }
     }
