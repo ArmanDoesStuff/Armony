@@ -1,6 +1,9 @@
-﻿#if ARMONY_NETCODE
+﻿//Copyright AWAN SOFTWORKS LTD 2025
+#if ARMONY_NETCODE
 using System.Collections.Generic;
 using Unity.Netcode;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Armony.Utilities.Libraries
 {

@@ -1,7 +1,9 @@
-//AWAN SOFTWORKS LTD 2023
+//Copyright AWAN SOFTWORKS LTD 2025
 
 using System.Linq;
 using UnityEngine;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Armony.Utilities.Libraries
 {
@@ -108,5 +110,9 @@ namespace Armony.Utilities.Libraries
             float absY = Mathf.Abs(_vector.y);
             return Mathf.Min(absX, absY) / Mathf.Max(absX, absY);
         }
+
+        //mathematically accurate modulus function
+        public static int Modulus(this int _i, int _count) =>
+            (_i % _count + _count) % _count;
     }
 }

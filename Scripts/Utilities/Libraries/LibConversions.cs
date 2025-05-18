@@ -1,7 +1,8 @@
-//AWAN SOFTWORKS LTD 2023
+//Copyright AWAN SOFTWORKS LTD 2025
 
-using UnityEditor;
 using UnityEngine;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Armony.Utilities.Libraries
 {

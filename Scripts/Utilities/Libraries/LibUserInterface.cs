@@ -1,12 +1,12 @@
-//AWAN SOFTWORKS LTD 2023
+//Copyright AWAN SOFTWORKS LTD 2025
 
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Object = System.Object;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Armony.Utilities.Libraries
 {
@@ -86,18 +86,17 @@ namespace Armony.Utilities.Libraries
                 contentRect.anchoredPosition = (Vector2)scrollRect.InverseTransformPoint(contentRect.position) - new Vector2(0, scrollRect.InverseTransformPoint(_snap.position).y);
         }
 
-        public static Selectable LinkNavigationVertical(Selectable[] _fileBtns)
+        public static Selectable LinkNavigationVertical(Selectable[] _fileButtons)
         {
-            int len = _fileBtns.Length;
-            for (int i = 0; i < len; i++)
+            for (int i = 0; i < _fileButtons.Length; i++)
             {
-                Navigation n = _fileBtns[i].navigation;
-                n.selectOnUp = _fileBtns[(i - 1).LoopInt(len)];
-                n.selectOnDown = _fileBtns[(i + 1).LoopInt(len)];
-                _fileBtns[i].navigation = n;
+                Navigation n = _fileButtons[i].navigation;
+                n.selectOnUp = _fileButtons.Looped(i - 1);
+                n.selectOnDown =_fileButtons.Looped(i + 1);
+                _fileButtons[i].navigation = n;
             }
 
-            return _fileBtns[0];
+            return _fileButtons[0];
         }
 
         public static void FadeInstant(this CanvasGroup _cGroup, bool _setActive)

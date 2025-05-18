@@ -1,6 +1,10 @@
-﻿using System;
+﻿//Copyright AWAN SOFTWORKS LTD 2025
+
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Armony.Utilities.Libraries
 {

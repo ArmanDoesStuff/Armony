@@ -1,4 +1,4 @@
-//AWAN SOFTWORKS LTD 2023
+//Copyright AWAN SOFTWORKS LTD 2025
 
 using System;
 using System.Collections.Generic;
@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Armony.Utilities.Libraries
 {
@@ -33,38 +35,13 @@ namespace Armony.Utilities.Libraries
 
             return sList;
         }
-
-        //modulus but works with negatives
-        public static int LoopInt(this int _i, int _count)
+        
+        public static bool IsDigitsOnly(this string _string)
         {
-            if (_count > 0) return (_i % _count + _count) % _count;
-            Debug.LogError("LoopInt Count less than or equal to 0");
-            return 0;
-
+            return _string.All(_char => _char is >= '0' and <= '9');
         }
 
-        public static bool IsDigitsOnly(this string _str)
-        {
-            foreach (char c in _str)
-            {
-                if (c < '0' || c > '9')
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static void Populate<T>(this T[] _arr, T _value)
-        {
-            for (int i = 0; i < _arr.Length; ++i)
-            {
-                _arr[i] = _value;
-            }
-        }
-
-        public static async void Invoke(Action _f, float _delay = 0f)
+        public static async void Invoke(Action _action, float _delay = 0f)
         {
             if (_delay > 0)
             {
@@ -75,7 +52,7 @@ namespace Armony.Utilities.Libraries
                 await Task.Yield();
             }
 
-            _f();
+            _action();
         }
 
         public static bool RandomBoolean()
@@ -125,6 +102,21 @@ namespace Armony.Utilities.Libraries
         {
             T[] array = _enumerable.ToArray();
             return array[UnityEngine.Random.Range(0, array.Length)];
+        }
+
+        public static T Looped<T>(this IEnumerable<T> _enumerable, int _index)
+        {
+            T[] array = _enumerable.ToArray();
+            return array[_index.Modulus(array.Length)];
+        }
+        
+        //Same as Array.Fill in .NET Core 2.0+ / .NET 5+
+        public static void Populate<T>(this T[] _array, T _value)
+        {
+            for (int i = 0; i < _array.Length; ++i)
+            {
+                _array[i] = _value;
+            }
         }
     }
 }
