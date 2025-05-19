@@ -37,29 +37,15 @@ namespace Armony.Utilities.Audio
 
         internal static AudioMixerGroup[] MixerGroups => Instance.mainMixer.FindMatchingGroups(string.Empty);
 
-        public static float[] Volumes
-        {
-            get
-            {
-                float[] volumes = new float[Enum.GetNames(typeof(SoundType)).Length];
-                for (int volume = 0; volume < volumes.Length; volume++)
-                {
-                    volumes[volume] = GetVolume((SoundType)volume);
-                }
-
-                return volumes;
-            }
-        }
-
         public static bool IsPlaying => sources.Any(_a => _a.isPlaying);
 
         public static float GetVolume(SoundType _soundType)
         {
-            Instance.mainMixer.GetFloat($"volume{_soundType.ToString()}", out float volume);
+            Instance.mainMixer.GetFloat(_soundType.ToString(), out float volume);
             volume = (volume + 80f) / 80f;
             return volume;
         }
-        
+
         public static Dictionary<SoundType, float> GetVolumes()
         {
             Dictionary<SoundType, float> volumes = new();
@@ -67,13 +53,14 @@ namespace Armony.Utilities.Audio
             {
                 volumes[type] = GetVolume(type);
             }
+
             return volumes;
         }
 
         public static void SetVolume(SoundType _soundType, float _volume)
         {
             _volume = (Mathf.Clamp01(_volume) * 80f) - 80f;
-            Instance.mainMixer.SetFloat($"volume{_soundType.ToString()}", _volume);
+            Instance.mainMixer.SetFloat(_soundType.ToString(), _volume);
         }
 
         public static void SetVolumes(Dictionary<SoundType, float> _volumes)
@@ -129,7 +116,6 @@ namespace Armony.Utilities.Audio
             SoundType _soundType = SoundType.General,
             float _pitch = 1,
             float _volume = 1,
-            bool _applySoundType = true,
             Vector3? _position = null
         )
         {
@@ -137,8 +123,7 @@ namespace Armony.Utilities.Audio
 #if UNITY_EDITOR
             audS.gameObject.name = _clip.name;
 #endif
-            if (_applySoundType)
-                audS.outputAudioMixerGroup = AudioMaster.MixerGroups[(int)_soundType];
+            audS.outputAudioMixerGroup = AudioMaster.MixerGroups[(int)_soundType];
             audS.clip = _clip;
             audS.pitch = _pitch;
             audS.volume = _volume;
@@ -153,18 +138,16 @@ namespace Armony.Utilities.Audio
             this AudioClip[] _clips,
             SoundType _soundType = SoundType.General,
             float _pitch = 1, float _volume = 1,
-            bool _applySoundType = true,
             Vector3? _position = null
-        ) => Play(_clips[UnityEngine.Random.Range(0, _clips.Length)], _soundType, _pitch, _volume, _applySoundType, _position);
+        ) => Play(_clips[UnityEngine.Random.Range(0, _clips.Length)], _soundType, _pitch, _volume, _position);
 
         public static AudioSource PlayRandom(
             this List<AudioClip> _clips,
             SoundType _soundType = SoundType.General,
             float _pitch = 1,
             float _volume = 1,
-            bool _applySoundType = true,
             Vector3? _position = null
-        ) => PlayRandom(_clips.ToArray(), _soundType, _pitch, _volume, _applySoundType, _position);
+        ) => PlayRandom(_clips.ToArray(), _soundType, _pitch, _volume, _position);
 
         public static void SetFalloff(this AudioSource _source, float _maxDistance = 30f, float? _spatialBlend = null)
         {
