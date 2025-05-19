@@ -53,24 +53,34 @@ namespace Armony.Utilities.Audio
 
         public static bool IsPlaying => sources.Any(_a => _a.isPlaying);
 
-        private static float GetVolume(SoundType _soundType)
+        public static float GetVolume(SoundType _soundType)
         {
             Instance.mainMixer.GetFloat($"volume{_soundType.ToString()}", out float volume);
             volume = (volume + 80f) / 80f;
             return volume;
         }
+        
+        public static Dictionary<SoundType, float> GetVolumes()
+        {
+            Dictionary<SoundType, float> volumes = new();
+            foreach (SoundType type in Enum.GetValues(typeof(SoundType)))
+            {
+                volumes[type] = GetVolume(type);
+            }
+            return volumes;
+        }
 
-        private static void SetVolume(SoundType _soundType, float _volume)
+        public static void SetVolume(SoundType _soundType, float _volume)
         {
             _volume = (Mathf.Clamp01(_volume) * 80f) - 80f;
             Instance.mainMixer.SetFloat($"volume{_soundType.ToString()}", _volume);
         }
 
-        public static void SetVolumes(float[] _volumes)
+        public static void SetVolumes(Dictionary<SoundType, float> _volumes)
         {
-            for (int i = 0; i < _volumes.Length; i++)
+            foreach (KeyValuePair<SoundType, float> pair in _volumes)
             {
-                SetVolume((SoundType)i, _volumes[i]);
+                SetVolume(pair.Key, pair.Value);
             }
         }
 

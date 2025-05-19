@@ -7,22 +7,19 @@ namespace Armony.Misc.UserInterface
 {
     public class SliderExtended : Slider
     {
-        [SerializeField]
-        private UnityEvent m_selectE;
-        private UnityEvent SelectEvent => m_selectE;
-        [SerializeField]
-        private UnityEvent m_deselectEvent;
-        private UnityEvent DeselectEvent => m_deselectEvent;
-        
-        public override void OnSelect(BaseEventData eventData)
+        public UnityEvent selectEvent;
+        public UnityEvent deselectEvent;
+
+        public override void OnSelect(BaseEventData _eventData)
         {
-            base.OnSelect(eventData);
-            SelectEvent.Invoke();
+            base.OnSelect(_eventData);
+            selectEvent.Invoke();
         }
-        public override void OnDeselect(BaseEventData eventData)
+
+        public override void OnDeselect(BaseEventData _eventData)
         {
-            base.OnDeselect(eventData);
-            DeselectEvent .Invoke();
+            base.OnDeselect(_eventData);
+            deselectEvent.Invoke();
         }
     }
 }
