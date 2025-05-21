@@ -12,8 +12,9 @@ namespace ArmanDoesStuff.Core
 {
     public static class DataOperations
     {
-        private static string GetFilename(string _fileName) => $"{Application.persistentDataPath}/{_fileName}.gData";
-        private static string GetPrefsFilename(string _fileName) => $"{GetFilename(_fileName)}Prefs";
+        private static string BaseDirectory => Path.Combine(Application.persistentDataPath, "GameData");
+        private static string GetFilename(string _fileName) => Path.Combine(BaseDirectory, $"{_fileName}.gData");
+        private static string GetPrefsFilename(string _fileName) => Path.Combine(BaseDirectory, $"{_fileName}.pData");
 
         public static void SaveData<T>(T _saveData, string _fileName = "Main")
         {
@@ -73,16 +74,27 @@ namespace ArmanDoesStuff.Core
 
         public static void ClearData()
         {
-            DirectoryInfo info = new(Application.persistentDataPath);
-            foreach (FileInfo file in info.GetFiles())
+            if (Directory.Exists(BaseDirectory))
             {
-                file.Delete();
+                try
+                {
+                    Directory.Delete(BaseDirectory, true);
+                    Debug.Log("GameData deleted.");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"Failed to delete GameData folder:\n{ex.Message}");
+                }
             }
-
-            foreach (DirectoryInfo dir in info.GetDirectories())
+            else
             {
-                dir.Delete(true);
+                Debug.Log("GameData not found.");
             }
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         public static void DeleteFile(string _fileName, bool _prefs = false)
