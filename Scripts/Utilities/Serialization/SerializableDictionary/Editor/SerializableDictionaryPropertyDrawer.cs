@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using Armony.Utilities.Libraries;
+using UnityEditor;
 using UnityEngine;
 using static Armony.Utilities.Libraries.LibUserInterface;
 
@@ -94,7 +95,8 @@ namespace Armony.Utilities.Serialization.Editor
             float height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             if (ShowProperty)
             {
-                height += EditorGUIUtility.singleLineHeight * keysProperty.arraySize;
+                bool keyIsEnum = keysProperty.arraySize > 0 && keysProperty.GetArrayElementAtIndex(0).FindPropertyRelative("key").propertyType == SerializedPropertyType.Enum;
+                height += EditorGUIUtility.singleLineHeight * (keysProperty.arraySize + (!keyIsEnum).ToInt());
             }
 
             return height;
