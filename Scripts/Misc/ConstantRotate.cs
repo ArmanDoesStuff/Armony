@@ -11,7 +11,7 @@ namespace Armony.Misc
 
         private void Update()
         {
-            transform.eulerAngles += Speed * Time.deltaTime;
+            transform.localEulerAngles += Speed * Time.deltaTime;
         }
     }
 }
