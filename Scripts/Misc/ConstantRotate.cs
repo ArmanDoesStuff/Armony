@@ -1,17 +1,17 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Armony.Misc
 {
     public class ConstantRotate : MonoBehaviour
     {
         [SerializeField]
-        private Vector3 m_speed;
-        private Vector3 Speed => m_speed;
+        private Vector3 speed;
         
 
         private void Update()
         {
-            transform.localEulerAngles += Speed * Time.deltaTime;
+            transform.Rotate(speed * Time.deltaTime);
         }
     }
 }
