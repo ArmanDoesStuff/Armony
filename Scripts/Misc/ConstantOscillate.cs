@@ -5,11 +5,8 @@ namespace Armony.Misc
 {
     public class ConstantOscillate : MonoBehaviour
     {
-        [SerializeField]
-        private Vector3 offset;
-        
-        [SerializeField]
-        private float timeTaken = 1f;
+        public Vector3 offset;
+        public float timeTaken = 1f;
 
         private Vector3 initialPosition;
         private float timer;
