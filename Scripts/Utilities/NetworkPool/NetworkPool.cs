@@ -14,7 +14,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
 
         private Transform Holder { get; set; }
 
-        public void Construct(int poolCapacity, INetworkPoolUser networkPoolUser)
+        public void Construct(int _poolCapacity, INetworkPoolUser _networkPoolUser)
         {
             if (PooledObjects != null)
             {
@@ -26,10 +26,10 @@ namespace Armony.Scripts.Utilities.NetworkPool
             else
             {
                 Holder = new GameObject("NetworkPool").transform;
-                PooledObjects = new INetworkPoolable[poolCapacity];
+                PooledObjects = new INetworkPoolable[_poolCapacity];
             }
 
-            NetworkPoolUser = networkPoolUser;
+            NetworkPoolUser = _networkPoolUser;
             Holder.parent = transform;
         }
 
@@ -39,42 +39,41 @@ namespace Armony.Scripts.Utilities.NetworkPool
             return CurrentIndex;
         }
 
-        public T GetPooledObject<T>(T poolableType, Vector3 position, Quaternion rotation, int objectIndex)
+        public T GetPooledObject<T>(T _poolableType, Vector3 _position, Quaternion _rotation, int _objectIndex)
             where T : INetworkPoolable
         {
-            if (PooledObjects[objectIndex] == null)
+            if (PooledObjects[_objectIndex] == null)
             {
-                PooledObjects[objectIndex] = poolableType.Initialize(Holder, NetworkPoolUser).GetComponent<T>();
-                PooledObjects[objectIndex].Index = objectIndex;
+                PooledObjects[_objectIndex] = _poolableType.Initialize(Holder, NetworkPoolUser).GetComponent<T>();
+                PooledObjects[_objectIndex].Index = _objectIndex;
             }
 
-            PooledObjects[objectIndex].Get(position, rotation);
-            return (T)PooledObjects[objectIndex];
+            PooledObjects[_objectIndex].Get(_position, _rotation);
+            return (T)PooledObjects[_objectIndex];
         }
 
-        public void ClearPoolable(int index)
+        public void ClearPoolable(int _index)
         {
-            PooledObjects[index] = null;
+            PooledObjects[_index] = null;
         }
 
-        public void ReleasePooledObject(int index)
+        public void ReleasePooledObject(int _index, bool _replicate = true)
         {
-            ReleaseLocal(index);
-            ReleasePooledObjectServerRpc(index);
+            if (_replicate)
+                ReleasePooledObjectServerRpc(_index);
+            PooledObjects[_index].Release();
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void ReleasePooledObjectServerRpc(int index, ServerRpcParams rpcParams = default) =>
-            ReleasePooledObjectClientRpc(index, LibServer.SendExceptCaller(rpcParams));
+        private void ReleasePooledObjectServerRpc(int _index) =>
+            ReleasePooledObjectClientRpc(_index);
 
         [ClientRpc]
-        private void ReleasePooledObjectClientRpc(int index, ClientRpcParams rpcParams)
+        private void ReleasePooledObjectClientRpc(int _index)
         {
-            if (index >= PooledObjects.Length || PooledObjects[index] == null) return;
-            ReleaseLocal(index);
+            if (_index >= PooledObjects.Length || PooledObjects[_index] == null) return;
+            ReleasePooledObject(_index, false);
         }
-
-        private void ReleaseLocal(int index) => PooledObjects[index].Release();
     }
 }
 #endif
