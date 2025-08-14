@@ -1,21 +1,25 @@
 ﻿#if ARMONY_NETCODE
+using Codice.CM.SEIDInfo;
 using UnityEngine;
 
 namespace Armony.Scripts.Utilities.NetworkPool
 {
-    public interface INetworkPoolable
+    public abstract class NetworkPoolable : MonoBehaviour
     {
-        public int Index { get; set; }
+        private NetworkPool pool;
 
-        void RequestRelease();
+        protected void Release()
+        {
+            pool.ReleasePoolable(this);
+            gameObject.SetActive(false);
+        }
         
-        void Release();
-        
-        void Get(Vector3 position, Quaternion rotation);
+        public abstract void Get(Vector3 _position, Quaternion _rotation);
 
-        GameObject Initialize(Transform holder, INetworkPoolUser parent);
+        public abstract NetworkPoolable Build(Transform _holder, INetworkPoolUser _user);
+        public void Initialize(NetworkPool _pool) => pool = _pool;
 
-        void Deinitialize();
+        public abstract void Deinitialize();
     }
 }
 #endif

@@ -1,5 +1,7 @@
 ﻿#if ARMONY_NETCODE
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Armony.Utilities.Libraries;
 using Unity.Netcode;
 using UnityEngine;
@@ -9,70 +11,60 @@ namespace Armony.Scripts.Utilities.NetworkPool
     public class NetworkPool : NetworkBehaviour
     {
         private INetworkPoolUser NetworkPoolUser { get; set; }
-        private INetworkPoolable[] PooledObjects { get; set; }
-        private int CurrentIndex { get; set; }
-
+        private Stack<NetworkPoolable> PooledObjects { get; set; }
         private Transform Holder { get; set; }
+        private NetworkPoolable poolableType;
 
-        public void Construct(int _poolCapacity, INetworkPoolUser _networkPoolUser)
+        public void Construct(INetworkPoolUser _networkPoolUser, NetworkPoolable _poolableType)
         {
+            poolableType = _poolableType;
             if (PooledObjects != null)
             {
-                foreach (INetworkPoolable poolable in PooledObjects)
+                foreach (NetworkPoolable poolable in PooledObjects.Where(_poolable => _poolable != null))
                 {
-                    poolable?.Deinitialize();
+                    poolable.Deinitialize();
                 }
             }
             else
             {
                 Holder = new GameObject("NetworkPool").transform;
-                PooledObjects = new INetworkPoolable[_poolCapacity];
+                PooledObjects = new Stack<NetworkPoolable>();
             }
 
             NetworkPoolUser = _networkPoolUser;
             Holder.parent = transform;
         }
 
-        public int IncrementIndex()
-        {
-            CurrentIndex = (CurrentIndex + 1) % PooledObjects.Length;
-            return CurrentIndex;
-        }
-
-        public T GetPooledObject<T>(T _poolableType, Vector3 _position, Quaternion _rotation, int _objectIndex)
-            where T : INetworkPoolable
-        {
-            if (PooledObjects[_objectIndex] == null)
-            {
-                PooledObjects[_objectIndex] = _poolableType.Initialize(Holder, NetworkPoolUser).GetComponent<T>();
-                PooledObjects[_objectIndex].Index = _objectIndex;
-            }
-
-            PooledObjects[_objectIndex].Get(_position, _rotation);
-            return (T)PooledObjects[_objectIndex];
-        }
-
-        public void ClearPoolable(int _index)
-        {
-            PooledObjects[_index] = null;
-        }
-
-        public void ReleasePooledObject(int _index, bool _replicate = true)
+        public NetworkPoolable GetPoolable(Vector3 _position, Quaternion _rotation, bool _replicate = true)
         {
             if (_replicate)
-                ReleasePooledObjectServerRpc(_index);
-            PooledObjects[_index].Release();
+                GetPoolableServerRPC(_position, _rotation);
+
+            NetworkPoolable poolable;
+            if (PooledObjects.Count == 0)
+            {
+                poolable = poolableType.Build(Holder, NetworkPoolUser);
+                poolable.Initialize(this);
+                PooledObjects.Push(poolable);
+            }
+
+            poolable = PooledObjects.Pop();
+            poolable.Get(_position, _rotation);
+            return poolable;
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void ReleasePooledObjectServerRpc(int _index) =>
-            ReleasePooledObjectClientRpc(_index);
+        private void GetPoolableServerRPC(Vector3 _position, Quaternion _rotation, ServerRpcParams _params = default) =>
+            GetPoolableClientRPC(_position, _rotation, LibServer.SendExceptCaller(_params));
 
         [ClientRpc]
-        private void ReleasePooledObjectClientRpc(int _index)
+        private void GetPoolableClientRPC(Vector3 _position, Quaternion _rotation, ClientRpcParams _sendCaller) =>
+            GetPoolable(_position, _rotation, false);
+
+
+        public void ReleasePoolable(NetworkPoolable _pooledObject)
         {
-            if (_index >= PooledObjects.Length || PooledObjects[_index] == null) return;
-            ReleasePooledObject(_index, false);
+            PooledObjects.Push(_pooledObject);
         }
     }
 }
