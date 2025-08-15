@@ -10,29 +10,25 @@ namespace Armony.Scripts.Utilities.NetworkPool
 {
     public class NetworkPool : NetworkBehaviour
     {
-        private INetworkPoolUser NetworkPoolUser { get; set; }
-        private Stack<NetworkPoolable> PooledObjects { get; set; }
-        private Transform Holder { get; set; }
+        private INetworkPoolUser networkPoolUser;
+        private readonly Stack<NetworkPoolable> pooledObjects = new();
+        private Transform holder;
         private NetworkPoolable poolableType;
+
+        public override void OnNetworkSpawn()
+        {
+            holder = new GameObject("NetworkPool") { transform = { parent = transform } }.transform;
+            base.OnNetworkSpawn();
+        }
 
         public void Construct(INetworkPoolUser _networkPoolUser, NetworkPoolable _poolableType)
         {
             poolableType = _poolableType;
-            if (PooledObjects != null)
+            networkPoolUser = _networkPoolUser;
+            foreach (NetworkPoolable poolable in pooledObjects.Where(_poolable => _poolable != null))
             {
-                foreach (NetworkPoolable poolable in PooledObjects.Where(_poolable => _poolable != null))
-                {
-                    poolable.Deinitialize();
-                }
+                poolable.Deinitialize();
             }
-            else
-            {
-                Holder = new GameObject("NetworkPool").transform;
-                PooledObjects = new Stack<NetworkPoolable>();
-            }
-
-            NetworkPoolUser = _networkPoolUser;
-            Holder.parent = transform;
         }
 
         public NetworkPoolable GetPoolable(Vector3 _position, Quaternion _rotation, bool _replicate = true)
@@ -41,14 +37,14 @@ namespace Armony.Scripts.Utilities.NetworkPool
                 GetPoolableServerRPC(_position, _rotation);
 
             NetworkPoolable poolable;
-            if (PooledObjects.Count == 0)
+            if (pooledObjects.Count == 0)
             {
-                poolable = poolableType.Build(Holder, NetworkPoolUser);
+                poolable = poolableType.Build(holder, networkPoolUser);
                 poolable.Initialize(this);
-                PooledObjects.Push(poolable);
+                pooledObjects.Push(poolable);
             }
 
-            poolable = PooledObjects.Pop();
+            poolable = pooledObjects.Pop();
             poolable.Get(_position, _rotation);
             return poolable;
         }
@@ -64,7 +60,7 @@ namespace Armony.Scripts.Utilities.NetworkPool
 
         public void ReleasePoolable(NetworkPoolable _pooledObject)
         {
-            PooledObjects.Push(_pooledObject);
+            pooledObjects.Push(_pooledObject);
         }
     }
 }
