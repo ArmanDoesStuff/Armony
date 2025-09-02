@@ -12,12 +12,10 @@ namespace Armony.Utilities.Serialization
         public class KeyWrapper
         {
             public TKey key;
-            public bool isValid;
 
-            public KeyWrapper(TKey key, bool isValid = true)
+            public KeyWrapper(TKey key)
             {
                 this.key = key;
-                this.isValid = isValid;
             }
         }
 
@@ -53,10 +51,6 @@ namespace Armony.Utilities.Serialization
             else
             {
                 MatchArrayLengths();
-                for (int i = 0; i < m_keys.Count; i++)
-                {
-                    m_keys[i].isValid = TryAdd(m_keys[i].key, m_values[i]);
-                }
             }
         }
 

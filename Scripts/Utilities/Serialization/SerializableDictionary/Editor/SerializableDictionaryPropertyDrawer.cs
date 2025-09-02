@@ -1,105 +1,166 @@
-﻿using Armony.Utilities.Libraries;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
-using static Armony.Utilities.Libraries.LibUserInterface;
+using UnityEngine.UIElements;
 
 namespace Armony.Utilities.Serialization.Editor
 {
     [CustomPropertyDrawer(typeof(SerializableDictionary<,>), true)]
     public class SerializableDictionaryPropertyDrawer : PropertyDrawer
     {
-        private bool ShowProperty { get; set; } = true;
-
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override VisualElement CreatePropertyGUI(SerializedProperty _property)
         {
-            Rect foldoutPosition = new(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
-            ShowProperty = EditorGUI.Foldout(foldoutPosition, ShowProperty, label);
-            position.y += EditorGUIUtility.singleLineHeight;
-            if (!ShowProperty) return;
-            EditorGUI.BeginProperty(position, label, property);
-            SerializedProperty keysProperty = property.FindPropertyRelative("m_keys");
-            SerializedProperty valuesProperty = property.FindPropertyRelative("m_values");
-            bool keyIsEnum = keysProperty.arraySize > 0 && keysProperty.GetArrayElementAtIndex(0).FindPropertyRelative("key").propertyType == SerializedPropertyType.Enum;
+            VisualElement root = new()
+            {
+                style =
+                {
+                    flexDirection = FlexDirection.Column
+                }
+            };
 
-            EditorGUI.indentLevel++;
-            int keyCount = 0;
+            Foldout foldout = new() { text = _property.displayName, value = true };
+            root.Add(foldout);
+
+            SerializedProperty keysProperty = _property.FindPropertyRelative("m_keys");
+            SerializedProperty valuesProperty = _property.FindPropertyRelative("m_values");
+
+            bool keyIsEnum = keysProperty.arraySize > 0 &&
+                             keysProperty.GetArrayElementAtIndex(0).FindPropertyRelative("key").propertyType ==
+                             SerializedPropertyType.Enum;
+
+            // Optional: show key count if not enum
             if (!keyIsEnum)
             {
-                Rect keyRect = new(position.x, position.y, EditorGUIUtility.currentViewWidth * .2f - EditorGUIUtility.fieldWidth, EditorGUIUtility.singleLineHeight);
-                EditorGUI.LabelField(keyRect, "Key Count:");
-
-                keyRect = new(position.x + keyRect.width, position.y, EditorGUIUtility.fieldWidth, EditorGUIUtility.singleLineHeight);
-                EditorGUI.BeginChangeCheck();
-                keyCount = EditorGUI.IntField(keyRect, keysProperty.arraySize);
-
-                if (!IsDictionaryValid(keysProperty))
+                IntegerField countField = new("Key Count") { value = keysProperty.arraySize };
+                countField.RegisterValueChangedCallback(_changeEvent =>
                 {
-                    keyRect.x += EditorGUIUtility.fieldWidth;
-                    keyRect.width = EditorGUIUtility.currentViewWidth - keyRect.width;
-                    EditorGUI.LabelField(keyRect, "Dictionary is invalid - Duplicate keys will be ignored");
-                }
-
-                position.y += EditorGUIUtility.singleLineHeight;
+                    int newSize = Mathf.Max(0, _changeEvent.newValue);
+                    keysProperty.arraySize = newSize;
+                    valuesProperty.arraySize = newSize;
+                    _property.serializedObject.ApplyModifiedProperties();
+                    foldout.schedule.Execute(() =>
+                    {
+                        SerializedObject so = _property.serializedObject;
+                        RebuildDictionaryUI(foldout, keysProperty, valuesProperty, false);
+                        foldout.Bind(so);
+                    }).ExecuteLater(0);
+                });
+                foldout.Add(countField);
             }
 
-            for (int i = 0; i < keysProperty.arraySize; i++)
+            RebuildDictionaryUI(foldout, keysProperty, valuesProperty, keyIsEnum);
+            return root;
+        }
+
+        private void RebuildDictionaryUI(VisualElement _foldout, SerializedProperty _keysProperty,
+            SerializedProperty _valuesProperty, bool _keyIsEnum)
+        {
+            while (_foldout.childCount > (_keyIsEnum ? 0 : 1))
+                _foldout.RemoveAt(_foldout.childCount - 1);
+
+            HashSet<int> duplicateIndices = new();
+
+            if (!_keyIsEnum)
             {
-                bool keyIsValid = keysProperty.GetArrayElementAtIndex(i).FindPropertyRelative("isValid").boolValue;
-                GUI.backgroundColor = keyIsValid ? GUI.skin.box.normal.textColor : Color.red;
+                Dictionary<string, List<int>> keyToIndices = new();
 
-                SerializedProperty key = keysProperty.GetArrayElementAtIndex(i).FindPropertyRelative("key");
-
-                Rect keyRect = new(position.x, position.y, position.width * 0.3f, EditorGUIUtility.singleLineHeight);
-                Rect valueRect = new(position.x + position.width * 0.3f, position.y, position.width * 0.7f, EditorGUIUtility.singleLineHeight);
-                if (keyIsEnum)
+                for (int i = 0; i < _keysProperty.arraySize; i++)
                 {
-                    EditorGUI.LabelField(keyRect, PascalSpace(key.enumNames[key.enumValueIndex]));
+                    SerializedProperty keyWrapper = _keysProperty.GetArrayElementAtIndex(i);
+                    SerializedProperty keyProp = keyWrapper.FindPropertyRelative("key");
+
+                    string keyString = GetKeyString(keyProp);
+
+                    if (!keyToIndices.ContainsKey(keyString))
+                        keyToIndices[keyString] = new List<int>();
+
+                    keyToIndices[keyString].Add(i);
+                }
+
+                foreach (int index in keyToIndices.Where(_kvp => _kvp.Value.Count > 1).SelectMany(_kvp => _kvp.Value))
+                {
+                    duplicateIndices.Add(index);
+                }
+            }
+
+            for (int i = 0; i < _keysProperty.arraySize; i++)
+            {
+                VisualElement row = new() { style = { flexDirection = FlexDirection.Row } };
+
+                SerializedProperty keyWrapper = _keysProperty.GetArrayElementAtIndex(i);
+                SerializedProperty keyProp = keyWrapper.FindPropertyRelative("key");
+                SerializedProperty valueProp = _valuesProperty.GetArrayElementAtIndex(i);
+
+                if (_keyIsEnum)
+                {
+                    string enumLabel = ObjectNames.NicifyVariableName(keyProp.enumNames[keyProp.enumValueIndex]);
+                    row.Add(new Label(enumLabel)
+                    {
+                        style =
+                        {
+                            flexBasis = Length.Percent(30),
+                            unityTextAlign = TextAnchor.MiddleLeft
+                        }
+                    });
                 }
                 else
                 {
-                    EditorGUI.PropertyField(keyRect, key, GUIContent.none);
+                    PropertyField keyField = new(keyProp, "") { style = { flexBasis = Length.Percent(30) } };
+
+                    if (duplicateIndices.Contains(i))
+                    {
+                        keyField.RegisterCallback<GeometryChangedEvent>(_ =>
+                        {
+                            var input = keyField.Q<VisualElement>("unity-text-input"); // works for most input types
+                            if (input != null)
+                            {
+                                input.style.borderBottomColor = Color.red;
+                                input.style.borderTopColor = Color.red;
+                                input.style.borderLeftColor = Color.red;
+                                input.style.borderRightColor = Color.red;
+                            }
+                        });
+                    }
+
+                    row.Add(keyField);
+
+                    keyField.RegisterCallback<FocusOutEvent>(_ =>
+                    {
+                        _keysProperty.serializedObject.ApplyModifiedProperties();
+                        _foldout.schedule.Execute(() =>
+                        {
+                            SerializedObject so = _keysProperty.serializedObject;
+                            RebuildDictionaryUI(_foldout, _keysProperty, _valuesProperty, false);
+                            _foldout.Bind(so);
+                        }).ExecuteLater(0);
+                    });
                 }
 
-                EditorGUI.PropertyField(valueRect, valuesProperty.GetArrayElementAtIndex(i), GUIContent.none);
-                position.y += EditorGUIUtility.singleLineHeight;
+                PropertyField valueField = new(valueProp, "") { style = { flexGrow = 1 } };
+                row.Add(valueField);
+
+                _foldout.Add(row);
             }
 
-            EditorGUI.indentLevel--;
-
-            if (!keyIsEnum && EditorGUI.EndChangeCheck())
-            {
-                keysProperty.arraySize = keyCount;
-            }
-
-            EditorGUI.EndProperty();
+            if (duplicateIndices.Count <= 0) return;
+            HelpBox warning = new("Duplicate keys detected!", HelpBoxMessageType.Warning);
+            _foldout.Add(warning);
         }
 
-        private bool IsDictionaryValid(SerializedProperty keysProperty)
+        private string GetKeyString(SerializedProperty _keyProp)
         {
-            for (int i = 0; i < keysProperty.arraySize; i++)
+            return _keyProp.propertyType switch
             {
-                SerializedProperty wrapperProperty = keysProperty.GetArrayElementAtIndex(i);
-                SerializedProperty isValidProperty = wrapperProperty.FindPropertyRelative("isValid");
-                if (!isValidProperty.boolValue)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            SerializedProperty keysProperty = property.FindPropertyRelative("m_keys");
-            float height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-            if (ShowProperty)
-            {
-                bool keyIsEnum = keysProperty.arraySize > 0 && keysProperty.GetArrayElementAtIndex(0).FindPropertyRelative("key").propertyType == SerializedPropertyType.Enum;
-                height += EditorGUIUtility.singleLineHeight * (keysProperty.arraySize + (!keyIsEnum).ToInt());
-            }
-
-            return height;
+                SerializedPropertyType.String => _keyProp.stringValue,
+                SerializedPropertyType.Integer => _keyProp.intValue.ToString(),
+                SerializedPropertyType.Enum => _keyProp.enumNames[_keyProp.enumValueIndex],
+                SerializedPropertyType.ObjectReference => _keyProp.objectReferenceValue
+                    ? _keyProp.objectReferenceValue.name
+                    : "null",
+                _ => _keyProp.ToString()
+            };
         }
     }
 }
