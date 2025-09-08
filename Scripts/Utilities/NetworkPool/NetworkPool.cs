@@ -25,9 +25,13 @@ namespace Armony.Scripts.Utilities.NetworkPool
         {
             poolableType = _poolableType;
             networkPoolUser = _networkPoolUser;
-            foreach (NetworkPoolable poolable in pooledObjects.Where(_poolable => _poolable != null))
+            while (pooledObjects.Count > 0)
             {
-                poolable.Deinitialize();
+                NetworkPoolable poolable = pooledObjects.Pop();
+                if (poolable != null)
+                {
+                    poolable.Deinitialize();
+                }
             }
         }
 
