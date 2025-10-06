@@ -1,5 +1,4 @@
 ﻿#if ARMONY_NETCODE
-using Codice.CM.SEIDInfo;
 using UnityEngine;
 
 namespace Armony.Scripts.Utilities.NetworkPool
