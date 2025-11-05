@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
+
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Global
 
@@ -35,7 +36,7 @@ namespace Armony.Utilities.Libraries
 
             return sList;
         }
-        
+
         public static bool IsDigitsOnly(this string _string)
         {
             return _string.All(_char => _char is >= '0' and <= '9');
@@ -76,19 +77,16 @@ namespace Armony.Utilities.Libraries
 
         public static void DestroyAllChildren(this Transform _parent, bool _immediate = false)
         {
-            if (!_immediate)
+            int childCount = _parent.childCount;
+            if (_immediate)
             {
-                foreach (Transform child in _parent)
-                {
-                    Object.Destroy(child.gameObject);
-                }
-
-                return;
+                for (int i = childCount - 1; i >= 0; i--)
+                    Object.DestroyImmediate(_parent.GetChild(i).gameObject);
             }
-
-            foreach (Transform child in _parent)
+            else
             {
-                Object.DestroyImmediate(child.gameObject);
+                for (int i = childCount - 1; i >= 0; i--)
+                    Object.Destroy(_parent.GetChild(i).gameObject);
             }
         }
 
@@ -109,7 +107,7 @@ namespace Armony.Utilities.Libraries
             T[] array = _enumerable.ToArray();
             return array[_index.Modulus(array.Length)];
         }
-        
+
         //Same as Array.Fill in .NET Core 2.0+ / .NET 5+
         public static void Populate<T>(this T[] _array, T _value)
         {
