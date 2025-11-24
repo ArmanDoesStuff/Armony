@@ -1,7 +1,9 @@
 //Copyright AWAN SOFTWORKS LTD 2025
 
 using System.Linq;
+using Mono.CSharp;
 using UnityEngine;
+
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Global
 
@@ -56,9 +58,16 @@ namespace Armony.Utilities.Libraries
             return Random.Range(0f, 1f) < _chance;
         }
 
-        public static void RotateRandom(this Transform _t)
+        public static int WeightedRandom(int _upperLimit, float _decay = 0.8f)
         {
-            _t.rotation = Random.rotation;
+            if (_upperLimit < 1) return 0;
+            _decay = Mathf.Clamp01(_decay);
+
+            float r = Random.value;
+            float maxCdf = 1f - Mathf.Pow(_decay, _upperLimit + 1);
+            float value = Mathf.Log(1f - r * maxCdf) / Mathf.Log(_decay);
+            int index = Mathf.FloorToInt(value);
+            return Mathf.Clamp(index, 0, _upperLimit);
         }
 
         public static void RotateRandom(this Transform _t, float _spread)
