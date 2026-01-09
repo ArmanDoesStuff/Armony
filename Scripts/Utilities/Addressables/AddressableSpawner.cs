@@ -1,8 +1,10 @@
 //AWAN SOFTWORKS LTD 2022
+
 #if ARMONY_ADDRESSABLES
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -12,159 +14,192 @@ namespace Armony.Utilities.Addressables
 {
     public static class AddressableSpawner
     {
-        private static  Dictionary<AssetReference, AsyncOperationHandle<GameObject>> AsyncOperationHandles { get; } = new();
+        private static Dictionary<AssetReference, AsyncOperationHandle<GameObject>> AsyncOperationHandles { get; } = new();
         private static Dictionary<AssetReference, List<GameObject>> SpawnedObjects { get; } = new();
 
-        public static async Task<T> InstantiateAddressable<T>(
-            this GameObject owner,
-            AssetReference assetReference,
-            bool single = false,
-            bool autoRelease = true,
-            Action action = null
-            )
-            where T : MonoBehaviour
+        private static CancellationTokenSource tokenSource;
+
+        private static CancellationToken Token
         {
-            Transform parent = owner.transform;
-            return await InstantiateAddressable<T>(assetReference, parent.position, parent.rotation, parent, single, autoRelease, action);
+            get
+            {
+                if (tokenSource == null || tokenSource.IsCancellationRequested)
+                    tokenSource = new CancellationTokenSource();
+                return tokenSource.Token;
+            }
         }
-        
+
         public static async Task<T> InstantiateAddressable<T>(
-            AssetReference assetReference,
-            Vector3 position,
-            Quaternion rotation,
-            Transform parent,
-            bool single = false,
-            bool autoRelease = true,
-            Action action = null
+            this GameObject _owner,
+            AssetReference _assetReference,
+            bool _single = false,
+            bool _autoRelease = true,
+            Action _action = null
         )
             where T : MonoBehaviour
         {
-            return (await InstantiateAddressable(assetReference, position, rotation, parent, single, autoRelease, action)).GetComponent<T>();
+            Transform parent = _owner.transform;
+            return await InstantiateAddressable<T>(_assetReference, parent.position, parent.rotation, parent, _single, _autoRelease, _action);
+        }
+
+        public static async Task<T> InstantiateAddressable<T>(
+            AssetReference _assetReference,
+            Vector3 _position,
+            Quaternion _rotation,
+            Transform _parent,
+            bool _single = false,
+            bool _autoRelease = true,
+            Action _action = null
+        )
+            where T : MonoBehaviour
+        {
+            return (await InstantiateAddressable(_assetReference, _position, _rotation, _parent, _single, _autoRelease, _action)).GetComponent<T>();
         }
 
         public static async Task<GameObject> InstantiateAddressable(
-            AssetReference assetReference,
-            Vector3 position,
-            Quaternion rotation,
-            Transform parent,
-            bool single = false,
-            bool autoRelease = true,
-            Action action = null
+            AssetReference _assetReference,
+            Vector3 _position,
+            Quaternion _rotation,
+            Transform _parent,
+            bool _single = false,
+            bool _autoRelease = true,
+            Action _action = null
         )
         {
-            if (!assetReference.RuntimeKeyIsValid())
+            if (!_assetReference.RuntimeKeyIsValid())
             {
-                Debug.LogError($"Invalid key: {assetReference.RuntimeKey}");
+                Debug.LogError($"Invalid key: {_assetReference.RuntimeKey}");
                 return null;
             }
-            if (!AsyncOperationHandles.ContainsKey(assetReference))
+
+            if (!AsyncOperationHandles.ContainsKey(_assetReference))
             {
-                AsyncOperationHandles[assetReference] = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(assetReference);
-                return await LoadRefAndSpawn(assetReference, position, rotation, parent, autoRelease, action);
+                AsyncOperationHandles[_assetReference] = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(_assetReference);
+                return await LoadRefAndSpawn(_assetReference, _position, _rotation, _parent, _autoRelease, _action);
             }
-            if (single) return GetLastSpawnedAddressable(assetReference);
-            if (AsyncOperationHandles[assetReference].IsDone)
+
+            if (_single) return GetLastSpawnedAddressable(_assetReference);
+            if (AsyncOperationHandles[_assetReference].IsDone)
             {
-                return await SpawnFromLoadedRef(assetReference, position, rotation, parent, autoRelease, action);
+                return await SpawnFromLoadedRef(_assetReference, _position, _rotation, _parent, _autoRelease, _action);
             }
-            return await LoadRefAndSpawn(assetReference, position, rotation, parent, autoRelease, action);
+
+            return await LoadRefAndSpawn(_assetReference, _position, _rotation, _parent, _autoRelease, _action);
         }
 
         private static async Task<GameObject> LoadRefAndSpawn(
-            AssetReference assetReference,
-            Vector3 position,
-            Quaternion rotation,
-            Transform parent,
-            bool autoRelease,
-            Action action
+            AssetReference _assetReference,
+            Vector3 _position,
+            Quaternion _rotation,
+            Transform _parent,
+            bool _autoRelease,
+            Action _action
         )
         {
-            while (AsyncOperationHandles[assetReference].Status == AsyncOperationStatus.None)
+            while (AsyncOperationHandles[_assetReference].Status == AsyncOperationStatus.None)
+            {
+                Token.ThrowIfCancellationRequested();
                 await Task.Yield();
-            return await SpawnFromLoadedRef(assetReference, position, rotation, parent, autoRelease, action);
+            }
+
+            return await SpawnFromLoadedRef(_assetReference, _position, _rotation, _parent, _autoRelease, _action);
         }
 
         private static async Task<GameObject> SpawnFromLoadedRef(
-            AssetReference assetReference,
-            Vector3 position,
-            Quaternion rotation,
-            Transform parent,
-            bool autoRelease,
-            Action action
+            AssetReference _assetReference,
+            Vector3 _position,
+            Quaternion _rotation,
+            Transform _parent,
+            bool _autoRelease,
+            Action _action
         )
         {
-            AsyncOperationHandle<GameObject> instantiateAsync = assetReference.InstantiateAsync(position, rotation, parent);
+            AsyncOperationHandle<GameObject> instantiateAsync = _assetReference.InstantiateAsync(_position, _rotation, _parent);
             while (instantiateAsync.Status == AsyncOperationStatus.None)
+            {
+                Token.ThrowIfCancellationRequested();
                 await Task.Yield();
+            }
+
             GameObject go = instantiateAsync.Result;
 
-            if (!SpawnedObjects.ContainsKey(assetReference))
+            if (!SpawnedObjects.ContainsKey(_assetReference))
             {
-                SpawnedObjects[assetReference] = new List<GameObject>();
+                SpawnedObjects[_assetReference] = new List<GameObject>();
             }
-            SpawnedObjects[assetReference].Add(go);
 
-            if (autoRelease)
+            SpawnedObjects[_assetReference].Add(go);
+
+            if (_autoRelease)
             {
                 AddressableGameObject goAdd = go.AddComponent<AddressableGameObject>();
-                goAdd.AssetRef = assetReference;
+                goAdd.AssetRef = _assetReference;
                 goAdd.Destroyed += ReleaseSingle;
             }
 
-            action?.Invoke();
+            _action?.Invoke();
             return go;
         }
 
-        public static void ReleaseAll(AssetReference assetReference)
+        public static void ReleaseAll(AssetReference _assetReference)
         {
-            List<GameObject> spawnedAddressables = GetSpawnedAddressables(assetReference);
+            List<GameObject> spawnedAddressables = GetSpawnedAddressables(_assetReference);
             foreach (GameObject go in spawnedAddressables)
             {
-                Release(assetReference, go);
+                Release(_assetReference, go);
             }
-            CheckHandle(assetReference);
+
+            CheckHandle(_assetReference);
         }
 
-        public static void ReleaseSingle(AssetReference assetReference, GameObject go)
+        private static void ReleaseSingle(AssetReference _assetReference, GameObject _go)
         {
-            Release(assetReference, go);
-            CheckHandle(assetReference);
+            Release(_assetReference, _go);
+            CheckHandle(_assetReference);
         }
 
-        private static void Release(AssetReference assetReference, GameObject go)
+        private static void Release(AssetReference _assetReference, GameObject _go)
         {
-            UnityEngine.AddressableAssets.Addressables.ReleaseInstance(go);
-            SpawnedObjects[assetReference].Remove(go);
+            UnityEngine.AddressableAssets.Addressables.ReleaseInstance(_go);
+            SpawnedObjects[_assetReference].Remove(_go);
         }
 
-        private static void CheckHandle(AssetReference assetReference)
+        private static void CheckHandle(AssetReference _assetReference)
         {
-            if (SpawnedObjects[assetReference].Count == 0)
+            if (SpawnedObjects[_assetReference].Count != 0) return;
+            if (AsyncOperationHandles[_assetReference].IsValid())
             {
-                if (AsyncOperationHandles[assetReference].IsValid())
-                {
-                    UnityEngine.AddressableAssets.Addressables.Release(AsyncOperationHandles[assetReference]);
-                }
-                AsyncOperationHandles.Remove(assetReference);
-                SpawnedObjects.Remove(assetReference);
+                UnityEngine.AddressableAssets.Addressables.Release(AsyncOperationHandles[_assetReference]);
             }
+
+            AsyncOperationHandles.Remove(_assetReference);
+            SpawnedObjects.Remove(_assetReference);
         }
 
-        public static List<GameObject> GetSpawnedAddressables(AssetReference assetReference) => AddressableHasBeenSpawned(assetReference) ? SpawnedObjects[assetReference] : null;
+        public static List<GameObject> GetSpawnedAddressables(AssetReference _assetReference) => AddressableHasBeenSpawned(_assetReference) ? SpawnedObjects[_assetReference] : null;
 
-        public static List<T> GetSpawnedAddressables<T>(AssetReference assetReference)
-            where T : MonoBehaviour => AddressableHasBeenSpawned(assetReference) ? SpawnedObjects[assetReference].Select((o) => o.GetComponent<T>()).ToList<T>() : null;
+        public static List<T> GetSpawnedAddressables<T>(AssetReference _assetReference)
+            where T : MonoBehaviour => AddressableHasBeenSpawned(_assetReference) ? SpawnedObjects[_assetReference].Select((_o) => _o.GetComponent<T>()).ToList<T>() : null;
 
-        public static GameObject GetLastSpawnedAddressable(AssetReference assetReference) =>
-            AddressableHasBeenSpawned(assetReference) ? SpawnedObjects[assetReference][SpawnedObjects[assetReference].Count - 1] : null;
+        public static GameObject GetLastSpawnedAddressable(AssetReference _assetReference) =>
+            AddressableHasBeenSpawned(_assetReference) ? SpawnedObjects[_assetReference][SpawnedObjects[_assetReference].Count - 1] : null;
 
-        public static T GetLastSpawnedAddressable<T>(AssetReference assetReference)
+        public static T GetLastSpawnedAddressable<T>(AssetReference _assetReference)
             where T : MonoBehaviour =>
-            AddressableHasBeenSpawned(assetReference) ? SpawnedObjects[assetReference][SpawnedObjects[assetReference].Count - 1].GetComponent<T>() : null;
+            AddressableHasBeenSpawned(_assetReference) ? SpawnedObjects[_assetReference][SpawnedObjects[_assetReference].Count - 1].GetComponent<T>() : null;
 
-        public static bool AddressableHasBeenSpawned(AssetReference assetReference)
+        public static bool AddressableHasBeenSpawned(AssetReference _assetReference)
         {
-            return SpawnedObjects.ContainsKey(assetReference);
+            return SpawnedObjects.ContainsKey(_assetReference);
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void Reset()
+        {
+            tokenSource?.Cancel();
+            tokenSource?.Dispose();
+            tokenSource = new CancellationTokenSource();
+            Debug.Log("AddressableSpawner Reset");
         }
     }
 }
