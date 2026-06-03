@@ -16,12 +16,12 @@ namespace Armony.Utilities.Libraries
             return Vector3.SqrMagnitude(_first - _second) < _range * _range;
         }
 
-        public static Vector3 RandomVec3(float _spread = 180)
+        public static Vector3 RandomVec3(float _spread = 180, float bias = 0)
         {
             return new Vector3(
-                Random.Range(-_spread, _spread),
-                Random.Range(-_spread, _spread),
-                Random.Range(-_spread, _spread)
+                bias + Random.Range(-_spread, _spread),
+                bias + Random.Range(-_spread, _spread),
+                bias + Random.Range(-_spread, _spread)
             );
         }
 
